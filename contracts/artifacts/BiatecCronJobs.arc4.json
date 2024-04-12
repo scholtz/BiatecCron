@@ -1,0 +1,33 @@
+{
+  "name": "BiatecCronJobs",
+  "desc": "",
+  "methods": [
+    {
+      "name": "createApplication",
+      "desc": "Initial setup",
+      "args": [
+        {
+          "name": "period",
+          "type": "uint64",
+          "desc": "Period in seconds how often this smart contract can be run"
+        },
+        {
+          "name": "offset",
+          "type": "uint64",
+          "desc": "Offset in seconds. Contract can be exectuted when Math.floor((currentTime + offset) / period)>Math.floor((lastRun + offset) / period)"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "execute",
+      "desc": "Initial setup",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}

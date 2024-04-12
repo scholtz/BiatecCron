@@ -1,0 +1,91 @@
+{
+  "hints": {
+    "createApplication(uint64,uint64)void": {
+      "call_config": {
+        "no_op": "CREATE"
+      }
+    },
+    "execute()void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
+    }
+  },
+  "bare_call_config": {
+    "no_op": "NEVER",
+    "opt_in": "NEVER",
+    "close_out": "NEVER",
+    "update_application": "NEVER",
+    "delete_application": "NEVER"
+  },
+  "schema": {
+    "local": {
+      "declared": {},
+      "reserved": {}
+    },
+    "global": {
+      "declared": {
+        "lastRun": {
+          "type": "uint64",
+          "key": "l"
+        },
+        "period": {
+          "type": "uint64",
+          "key": "p"
+        },
+        "offset": {
+          "type": "uint64",
+          "key": "o"
+        }
+      },
+      "reserved": {}
+    }
+  },
+  "state": {
+    "global": {
+      "num_byte_slices": 0,
+      "num_uints": 3
+    },
+    "local": {
+      "num_byte_slices": 0,
+      "num_uints": 0
+    }
+  },
+  "source": {
+    "approval": "I3ByYWdtYSB2ZXJzaW9uIDEwCgovLyBUaGlzIFRFQUwgd2FzIGdlbmVyYXRlZCBieSBURUFMU2NyaXB0IHYwLjg4LjEKLy8gaHR0cHM6Ly9naXRodWIuY29tL2FsZ29yYW5kZm91bmRhdGlvbi9URUFMU2NyaXB0CgovLyBUaGlzIGNvbnRyYWN0IGlzIGNvbXBsaWFudCB3aXRoIGFuZC9vciBpbXBsZW1lbnRzIHRoZSBmb2xsb3dpbmcgQVJDczogWyBBUkM0IF0KCi8vIFRoZSBmb2xsb3dpbmcgdGVuIGxpbmVzIG9mIFRFQUwgaGFuZGxlIGluaXRpYWwgcHJvZ3JhbSBmbG93Ci8vIFRoaXMgcGF0dGVybiBpcyB1c2VkIHRvIG1ha2UgaXQgZWFzeSBmb3IgYW55b25lIHRvIHBhcnNlIHRoZSBzdGFydCBvZiB0aGUgcHJvZ3JhbSBhbmQgZGV0ZXJtaW5lIGlmIGEgc3BlY2lmaWMgYWN0aW9uIGlzIGFsbG93ZWQKLy8gSGVyZSwgYWN0aW9uIHJlZmVycyB0byB0aGUgT25Db21wbGV0ZSBpbiBjb21iaW5hdGlvbiB3aXRoIHdoZXRoZXIgdGhlIGFwcCBpcyBiZWluZyBjcmVhdGVkIG9yIGNhbGxlZAovLyBFdmVyeSBwb3NzaWJsZSBhY3Rpb24gZm9yIHRoaXMgY29udHJhY3QgaXMgcmVwcmVzZW50ZWQgaW4gdGhlIHN3aXRjaCBzdGF0ZW1lbnQKLy8gSWYgdGhlIGFjdGlvbiBpcyBub3QgaW1wbGVtZW50ZWQgaW4gdGhlIGNvbnRyYWN0LCBpdHMgcmVzcGVjdGl2ZSBicmFuY2ggd2lsbCBiZSAiKk5PVF9JTVBMRU1FTlRFRCIgd2hpY2gganVzdCBjb250YWlucyAiZXJyIgp0eG4gQXBwbGljYXRpb25JRAohCmludCA2CioKdHhuIE9uQ29tcGxldGlvbgorCnN3aXRjaCAqY2FsbF9Ob09wICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqY3JlYXRlX05vT3AgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVEICpOT1RfSU1QTEVNRU5URUQgKk5PVF9JTVBMRU1FTlRFRCAqTk9UX0lNUExFTUVOVEVECgoqTk9UX0lNUExFTUVOVEVEOgoJZXJyCgovLyBjcmVhdGVBcHBsaWNhdGlvbih1aW50NjQsdWludDY0KXZvaWQKKmFiaV9yb3V0ZV9jcmVhdGVBcHBsaWNhdGlvbjoKCS8vIG9mZnNldDogdWludDY0Cgl0eG5hIEFwcGxpY2F0aW9uQXJncyAyCglidG9pCgoJLy8gcGVyaW9kOiB1aW50NjQKCXR4bmEgQXBwbGljYXRpb25BcmdzIDEKCWJ0b2kKCgkvLyBleGVjdXRlIGNyZWF0ZUFwcGxpY2F0aW9uKHVpbnQ2NCx1aW50NjQpdm9pZAoJY2FsbHN1YiBjcmVhdGVBcHBsaWNhdGlvbgoJaW50IDEKCXJldHVybgoKLy8gY3JlYXRlQXBwbGljYXRpb24ocGVyaW9kOiB1aW50NjQsIG9mZnNldDogdWludDY0KTogdm9pZAovLwovLyBJbml0aWFsIHNldHVwCi8vIEBwYXJhbSBwZXJpb2QgIFBlcmlvZCBpbiBzZWNvbmRzIGhvdyBvZnRlbiB0aGlzIHNtYXJ0IGNvbnRyYWN0IGNhbiBiZSBydW4KLy8gQHBhcmFtIG9mZnNldCBPZmZzZXQgaW4gc2Vjb25kcy4gQ29udHJhY3QgY2FuIGJlIGV4ZWN0dXRlZCB3aGVuIE1hdGguZmxvb3IoKGN1cnJlbnRUaW1lICsgb2Zmc2V0KSAvIHBlcmlvZCkgPiBNYXRoLmZsb29yKChsYXN0UnVuICsgb2Zmc2V0KSAvIHBlcmlvZCkKY3JlYXRlQXBwbGljYXRpb246Cglwcm90byAyIDAKCgkvLyBjb250cmFjdHNcQmlhdGVjQ3JvbkpvYnMuYWxnby50czoyNgoJLy8gdGhpcy5sYXN0UnVuLnZhbHVlID0gMAoJYnl0ZSAweDZjIC8vICJsIgoJaW50IDAKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzXEJpYXRlY0Nyb25Kb2JzLmFsZ28udHM6MjcKCS8vIGFzc2VydChwZXJpb2QgPiAwKQoJZnJhbWVfZGlnIC0xIC8vIHBlcmlvZDogdWludDY0CglpbnQgMAoJPgoJYXNzZXJ0CgoJLy8gY29udHJhY3RzXEJpYXRlY0Nyb25Kb2JzLmFsZ28udHM6MjgKCS8vIHRoaXMucGVyaW9kLnZhbHVlID0gcGVyaW9kCglieXRlIDB4NzAgLy8gInAiCglmcmFtZV9kaWcgLTEgLy8gcGVyaW9kOiB1aW50NjQKCWFwcF9nbG9iYWxfcHV0CgoJLy8gY29udHJhY3RzXEJpYXRlY0Nyb25Kb2JzLmFsZ28udHM6MjkKCS8vIHRoaXMub2Zmc2V0LnZhbHVlID0gb2Zmc2V0CglieXRlIDB4NmYgLy8gIm8iCglmcmFtZV9kaWcgLTIgLy8gb2Zmc2V0OiB1aW50NjQKCWFwcF9nbG9iYWxfcHV0CglyZXRzdWIKCi8vIGV4ZWN1dGUoKXZvaWQKKmFiaV9yb3V0ZV9leGVjdXRlOgoJLy8gZXhlY3V0ZSBleGVjdXRlKCl2b2lkCgljYWxsc3ViIGV4ZWN1dGUKCWludCAxCglyZXR1cm4KCi8vIGV4ZWN1dGUoKTogdm9pZAovLwovLyBJbml0aWFsIHNldHVwCi8vIEBwYXJhbSBwZXJpb2QgIFBlcmlvZCBpbiBzZWNvbmRzIGhvdyBvZnRlbiB0aGlzIHNtYXJ0IGNvbnRyYWN0IGNhbiBiZSBydW4KLy8gQHBhcmFtIG9mZnNldCBPZmZzZXQgaW4gc2Vjb25kcy4gQ29udHJhY3QgY2FuIGJlIGV4ZWN0dXRlZCB3aGVuIE1hdGguZmxvb3IoKGN1cnJlbnRUaW1lICsgb2Zmc2V0KSAvIHBlcmlvZCkgPiBNYXRoLmZsb29yKChsYXN0UnVuICsgb2Zmc2V0KSAvIHBlcmlvZCkKZXhlY3V0ZToKCXByb3RvIDAgMAoJcmV0c3ViCgoqY3JlYXRlX05vT3A6CgltZXRob2QgImNyZWF0ZUFwcGxpY2F0aW9uKHVpbnQ2NCx1aW50NjQpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfY3JlYXRlQXBwbGljYXRpb24KCWVycgoKKmNhbGxfTm9PcDoKCW1ldGhvZCAiZXhlY3V0ZSgpdm9pZCIKCXR4bmEgQXBwbGljYXRpb25BcmdzIDAKCW1hdGNoICphYmlfcm91dGVfZXhlY3V0ZQoJZXJy",
+    "clear": "I3ByYWdtYSB2ZXJzaW9uIDEw"
+  },
+  "contract": {
+    "name": "BiatecCronJobs",
+    "desc": "",
+    "methods": [
+      {
+        "name": "createApplication",
+        "desc": "Initial setup",
+        "args": [
+          {
+            "name": "period",
+            "type": "uint64",
+            "desc": "Period in seconds how often this smart contract can be run"
+          },
+          {
+            "name": "offset",
+            "type": "uint64",
+            "desc": "Offset in seconds. Contract can be exectuted when Math.floor((currentTime + offset) / period)>Math.floor((lastRun + offset) / period)"
+          }
+        ],
+        "returns": {
+          "type": "void"
+        }
+      },
+      {
+        "name": "execute",
+        "desc": "Initial setup",
+        "args": [],
+        "returns": {
+          "type": "void"
+        }
+      }
+    ]
+  }
+}

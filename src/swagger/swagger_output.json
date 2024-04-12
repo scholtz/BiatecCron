@@ -1,0 +1,335 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "v1.0.0",
+    "title": "Biatec scheduler Algorand smart contract builder",
+    "description": "Smart contract builder allows users to define tasks, build smart contract, and setup the scheduler\n\nLinks:\n* [Source code](https://github.com/scholtz/BiatecCron/)\n* [https://api-scheduler.biatec.io](https://api-scheduler.biatec.io)\n"
+  },
+  "servers": [
+    {
+      "url": "https://api-scheduler.biatec.io",
+      "description": "Web deployment"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Localhost"
+    }
+  ],
+  "paths": {
+    "/v1/convertYaml2Json": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/yaml": {
+              "schema": {
+                "$ref": "#/components/schemas/ICronJobDocument"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/convertJson2Yaml": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ICronJobDocument"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/build": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/yaml": {
+              "schema": {
+                "$ref": "#/components/schemas/ICronJobDocument"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ICronJobDocument"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/file/{id}/{fileName}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/v1/tx/{id}/{signer}/{appId}/{method}/{fileName}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "method",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/v1/txCreate/{id}/{signer}/{fileName}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ICronJobDocument": {
+        "type": "object",
+        "properties": {
+          "schedule": {
+            "type": "object",
+            "properties": {
+              "period": {
+                "type": "number",
+                "example": 3600
+              },
+              "offset": {
+                "type": "number",
+                "example": 0
+              }
+            }
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "task": {
+                  "type": "string",
+                  "example": "if@v1"
+                },
+                "displayName": {
+                  "type": "string",
+                  "example": "Check if "
+                },
+                "inputs": {
+                  "type": "object",
+                  "properties": {
+                    "condition": {
+                      "type": "string",
+                      "example": "2 * var1 > var2"
+                    },
+                    "ifTrue": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "task": {
+                            "type": "string",
+                            "example": "pay@v1"
+                          },
+                          "displayName": {
+                            "type": "string",
+                            "example": "Pay to X"
+                          },
+                          "inputs": {
+                            "type": "object",
+                            "properties": {
+                              "receiver": {
+                                "type": "string",
+                                "example": "SCH"
+                              },
+                              "amount": {
+                                "type": "string",
+                                "example": "var1"
+                              },
+                              "token": {
+                                "type": "number",
+                                "example": 1234
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "ifFalse": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "task": {
+                            "type": "string",
+                            "example": "pay@v1"
+                          },
+                          "displayName": {
+                            "type": "string",
+                            "example": "Pay to X"
+                          },
+                          "inputs": {
+                            "type": "object",
+                            "properties": {
+                              "receiver": {
+                                "type": "string",
+                                "example": "SCH"
+                              },
+                              "amount": {
+                                "type": "number",
+                                "example": 123
+                              },
+                              "token": {
+                                "type": "number",
+                                "example": 1234
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
