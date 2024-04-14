@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: biatec
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: biatec-cron-api-deployment
+  namespace: biatec
+spec:
+  selector:
+    matchLabels:
+      app: biatec-cron-api
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: biatec-cron-api
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+      - name: regcred
+      containers:
+        - name: biatec-cron-api
+          image: scholtz2/biatec-cron-api:1.2024.04.14-main
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: '500Mi'
+              cpu: '100m'
+            limits:
+              memory: '1000Mi'
+              cpu: '2000m'
+          ports: 
+            - containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 10
+            timeoutSeconds: 5  
+            failureThreshold: 2
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 20
+            timeoutSeconds: 5  
+            failureThreshold: 2
+            terminationGracePeriodSeconds: 1
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          volumeMounts:
+            - name: biatec-cron-builds
+              mountPath: /app/data
+      volumes:
+        - name: biatec-cron-builds
+          persistentVolumeClaim:
+            claimName: biatec-cron-builds
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: biatec-cron-builds
+  namespace: biatec
+spec:
+  storageClassName: nfs-slow-retain
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: biatec-cron-api-service
+  namespace: biatec
+spec:
+  type: ClusterIP
+  selector:
+    app: biatec-cron-api
+  ports:
+    - name: http
+      protocol: TCP
+      appProtocol: http
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: biatec-cron-api-ingress
+  namespace: biatec
+  annotations: 
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    cert-manager.io/cluster-issuer: letsencrypt
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+#  ingress.class: "nginx"
+  tls:
+  - hosts:
+    - api-scheduler.biatec.io
+    secretName: tls-api-scheduler.biatec.io
+  rules:
+  - host: api-scheduler.biatec.io
+    http:
+      paths:
+      - path: /(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: biatec-cron-api-service
+            port:
+              number: 8080
+
+              

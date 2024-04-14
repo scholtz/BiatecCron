@@ -20,6 +20,8 @@ RUN pip install algokit
 RUN npm install tealscript -g
 
 RUN useradd -ms /bin/bash app
+RUN mkdir /app && chown app:app /app
+
 USER app
 
 WORKDIR /app
