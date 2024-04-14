@@ -13,6 +13,7 @@ import * as algokit from '@algorandfoundation/algokit-utils';
 import ICronJobDocument from '../interface/ICronJobDocument';
 import { taskRenderer } from '../scripts/task/taskRenderer';
 import sha256 from '../scripts/crypto/sha256';
+import IBuildContent from '../interface/IBuildContent';
 
 export const builderRouter = Router();
 
@@ -138,7 +139,11 @@ builderRouter.post('/build', async (req: ExpressRequest, res: Response) => {
       })
     );
     console.log('hash', hash);
-    const tealscript = taskRenderer(doc.tasks);
+    const buildContent: IBuildContent = {
+      variables: {},
+      objectIter: 1,
+    };
+    const tealscript = taskRenderer(doc.tasks, buildContent);
     const data = fs.readFileSync('contracts/template.algo.ts').toString('utf-8');
     const outTealscript = data.replace('__SCRIPT__;', tealscript).replace('__SHORT_HASH__', hashShort);
 

@@ -146,6 +146,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     voteLast: uint64,
     voteKeyDilution: uint64
   ): void {
+    
     assert(this.txn.sender === globals.creatorAddress);
     sendOnlineKeyRegistration({
       selectionPK: selectionPk,

@@ -1,3 +1,5 @@
+import IBuildContent from '../../interface/IBuildContent';
+
 interface IInput {
   task: string;
   diplayName: string;
@@ -9,7 +11,8 @@ interface IInput {
     fee: string | undefined;
   };
 }
-const payV1 = (input: IInput) => {
+// eslint-disable-next-line no-unused-vars
+const payV1 = (input: IInput, buildContent: IBuildContent) => {
   let addFeeStr = '';
   if (input.inputs.fee) {
     addFeeStr = `,fee:${input.inputs.fee}`;

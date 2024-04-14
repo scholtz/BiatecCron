@@ -1,3 +1,5 @@
+import IBuildContent from '../../interface/IBuildContent';
+
 interface IInput {
   task: string;
   diplayName: string;
@@ -7,10 +9,13 @@ interface IInput {
     defaultValue: number | bigint | string;
   };
 }
-const varV1 = (input: IInput) => {
+const varV1 = (input: IInput, buildContent: IBuildContent) => {
+  const defineVar = buildContent?.variables[input.inputs.var] === undefined ? 'let ' : '';
+  // eslint-disable-next-line no-param-reassign
+  buildContent.variables[input.inputs.var] = input.inputs.var;
   if (input.inputs.type) {
-    return `let ${input.inputs.var}: ${input.inputs.type} = ${input.inputs.defaultValue};`;
+    return `${defineVar}${input.inputs.var}: ${input.inputs.type} = ${input.inputs.defaultValue};`;
   }
-  return `let ${input.inputs.var} = ${input.inputs.defaultValue};`;
+  return `${defineVar}${input.inputs.var} = ${input.inputs.defaultValue};`;
 };
 export default varV1;
