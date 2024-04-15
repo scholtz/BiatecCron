@@ -16,11 +16,13 @@ interface IInput {
 }
 const ifV1 = (input: IInput, buildContent: IBuildContent) => {
   if (!input.inputs.ifFalse || input.inputs.ifFalse.length === 0) {
-    return `if(${input.inputs.condition}){
+    return `// ifV1
+    if(${input.inputs.condition}){
   ${taskRenderer(input.inputs.ifTrue, buildContent)}
 }`;
   }
-  return `if(${input.inputs.condition}){
+  return `// ifV1
+  if(${input.inputs.condition}){
   ${taskRenderer(input.inputs.ifTrue, buildContent)}
 }else{
   ${taskRenderer(input.inputs.ifFalse, buildContent)}

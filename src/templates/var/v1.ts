@@ -14,8 +14,10 @@ const varV1 = (input: IInput, buildContent: IBuildContent) => {
   // eslint-disable-next-line no-param-reassign
   buildContent.variables[input.inputs.var] = input.inputs.var;
   if (input.inputs.type) {
-    return `${defineVar}${input.inputs.var}: ${input.inputs.type} = ${input.inputs.defaultValue};`;
+    return `// varV1
+    ${defineVar}${input.inputs.var}: ${input.inputs.type} = ${input.inputs.defaultValue};`;
   }
-  return `${defineVar}${input.inputs.var} = ${input.inputs.defaultValue};`;
+  return `// varV1
+  ${defineVar}${input.inputs.var} = ${input.inputs.defaultValue};`;
 };
 export default varV1;

@@ -65,9 +65,19 @@
         }
       }
     },
-    "/v1/build": {
+    "/v1/build/{rebuild}": {
       "post": {
         "description": "",
+        "parameters": [
+          {
+            "name": "rebuild",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -125,7 +135,7 @@
       }
     },
     "/v1/tx/{id}/{signer}/{appId}/{method}/{fileName}": {
-      "get": {
+      "post": {
         "description": "",
         "parameters": [
           {
@@ -179,7 +189,7 @@
         }
       }
     },
-    "/v1/txCreate/{id}/{signer}/{fileName}": {
+    "/v1/tx-create/{id}/{signer}/{fileName}": {
       "get": {
         "description": "",
         "parameters": [

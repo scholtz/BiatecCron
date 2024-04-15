@@ -3,6 +3,11 @@ import { Contract } from '@algorandfoundation/tealscript';
 // eslint-disable-next-line no-unused-vars, camelcase
 class BiatecCronJob__SHORT_HASH__ extends Contract {
   /**
+   * Identifier of the input app
+   */
+  id = GlobalStateKey<string>({ key: 'id' });
+
+  /**
    * Last time in unix timestamp when this app has been executed
    */
   lastRun = GlobalStateKey<uint64>({ key: 'l' });
@@ -92,11 +97,12 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   /**
    * Bootstrap the contract to optin to the fee asset and setup basic variables
    *
+   * @param id Hash id of the input app
    * @param txBaseDeposit Deposit MBR
    * @param period  Period in seconds how often this smart contract can be run
    * @param start Start time in unix timestamp seconds. Contract can be exectuted when Math.floor((currentTime + start) / period) > Math.floor((lastRun + start) / period)
    */
-  bootstrap(txBaseDeposit: PayTxn, period: uint64, start: uint64, fee: uint64): void {
+  bootstrap(txBaseDeposit: PayTxn, id: string, period: uint64, start: uint64, fee: uint64): void {
     assert(this.txn.sender === globals.creatorAddress);
     verifyPayTxn(txBaseDeposit, {
       receiver: this.app.address,
@@ -130,6 +136,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     });
 
     assert(period > 0);
+    this.id.value = id;
     this.period.value = period;
     this.start.value = start;
     this.fee.value = fee;
@@ -146,7 +153,6 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     voteLast: uint64,
     voteKeyDilution: uint64
   ): void {
-    
     assert(this.txn.sender === globals.creatorAddress);
     sendOnlineKeyRegistration({
       selectionPK: selectionPk,

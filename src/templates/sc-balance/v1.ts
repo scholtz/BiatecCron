@@ -13,11 +13,15 @@ const scBalanceV1 = (input: IInput, buildContent: IBuildContent) => {
   // eslint-disable-next-line no-param-reassign
   buildContent.variables[input.inputs.var] = input.inputs.var;
   if (input.inputs.token === '0') {
-    return `${defineVar}${input.inputs.var} = globals.currentApplicationAddress.balance;`;
+    return `
+    // scBalanceV1
+    ${defineVar}${input.inputs.var} = globals.currentApplicationAddress.balance;`;
   }
   if (defineVar) {
-    return `${defineVar}${input.inputs.var} = 0; if(input.inputs.token === 0){${input.inputs.var} = globals.currentApplicationAddress.balance;}else{${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64())}`;
+    return `// scBalanceV1
+    ${defineVar}${input.inputs.var} = 0; if(input.inputs.token === 0){${input.inputs.var} = globals.currentApplicationAddress.balance;}else{${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64())}`;
   }
-  return `if(input.inputs.token === 0){${input.inputs.var} = globals.currentApplicationAddress.balance;}else{${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64())}`;
+  return `// scBalanceV1
+  if(input.inputs.token === 0){${input.inputs.var} = globals.currentApplicationAddress.balance;}else{${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64())}`;
 };
 export default scBalanceV1;

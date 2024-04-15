@@ -74,7 +74,7 @@ builderRouter.post('/convertJson2Yaml', async (req: ExpressRequest, res: Respons
   }
 });
 
-builderRouter.post('/build', async (req: ExpressRequest, res: Response) => {
+builderRouter.post('/build/:rebuild', async (req: ExpressRequest, res: Response) => {
   /*  #swagger.requestBody = {
           required: true,
           content: {
@@ -112,15 +112,19 @@ builderRouter.post('/build', async (req: ExpressRequest, res: Response) => {
     }
     const tasksToHash = JSON.stringify(doc.tasks);
     const hash = sha256(tasksToHash);
-    if (fs.existsSync(`data/${hash}`) && fs.existsSync(`data/${hash}/status.json`)) {
-      const data = fs.readFileSync(`data/${hash}/status.json`);
-      res.set('content-type', 'application/json');
-      res.send(data.toString('utf-8'));
-      return;
+    if (req.params.rebuild !== '1') {
+      if (fs.existsSync(`data/${hash}`) && fs.existsSync(`data/${hash}/status.json`)) {
+        const data = fs.readFileSync(`data/${hash}/status.json`);
+        res.set('content-type', 'application/json');
+        res.send(data.toString('utf-8'));
+        return;
+      }
     }
-    fs.mkdirSync(`data/${hash}`);
-    fs.mkdirSync(`data/${hash}/artifacts`);
-    fs.mkdirSync(`data/${hash}/clients`);
+    if (!fs.existsSync(`data/${hash}`)) {
+      fs.mkdirSync(`data/${hash}`);
+      fs.mkdirSync(`data/${hash}/artifacts`);
+      fs.mkdirSync(`data/${hash}/clients`);
+    }
     fs.writeFileSync(`data/${hash}/input.json`, JSON.stringify(doc));
     fs.writeFileSync(`data/${hash}/input.yaml`, YAML.stringify(doc));
     const hashShort = hash.substring(0, 5);
@@ -375,7 +379,7 @@ builderRouter.post(`/tx/:id/:signer/:appId/:method/:fileName`, async (req: Expre
       // );
       console.log('client', client);
       const params = req.body;
-
+      params.id = req.params.id;
       const suggestedParams = await algod.getTransactionParams().do();
       if (req.params.method === 'bootstrap') {
         params.txBaseDeposit = algosdk.makePaymentTxnWithSuggestedParamsFromObject({

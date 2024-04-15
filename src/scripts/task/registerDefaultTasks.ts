@@ -5,6 +5,7 @@ import folksOracleV1 from '../../templates/folks-oracle/v1';
 // eslint-disable-next-line import/no-cycle
 import ifV1 from '../../templates/if/v1';
 import mathV1 from '../../templates/math/v1';
+import pactSwapV1 from '../../templates/pact/v1';
 import payV1 from '../../templates/pay/v1';
 import scBalanceV1 from '../../templates/sc-balance/v1';
 import varV1 from '../../templates/var/v1';
@@ -18,5 +19,6 @@ const registerDefaultTasks = () => {
   taskRegister('pay@v1', payV1 as (task: ITask) => string);
   taskRegister('sc-balance@v1', scBalanceV1 as (task: ITask) => string);
   taskRegister('assert@v1', assertV1 as (task: ITask) => string);
+  taskRegister('pact-swap@v1', pactSwapV1 as (task: ITask) => string);
 };
 export default registerDefaultTasks;
