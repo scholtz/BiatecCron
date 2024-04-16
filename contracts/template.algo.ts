@@ -140,7 +140,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
      * This will send notification to cron
      */
     sendPayment({
-      amount: globals.currentApplicationAddress.balance - globals.minBalance,
+      amount: globals.currentApplicationAddress.balance - 200000,
       note: 'reg',
       receiver: Address.fromAddress('SCPSTM7HIYCTAXLFFGSOKQRW24RKSPIEWSYSG52PKR2LESGRYTUGNBS7S4'),
     });
