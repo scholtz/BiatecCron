@@ -1,5 +1,8 @@
 import { Contract } from '@algorandfoundation/tealscript';
 
+/**
+ * Decentralized scheduler task - https://scheduler.biatec.io
+ */
 // eslint-disable-next-line no-unused-vars, camelcase
 class BiatecCronJob__SHORT_HASH__ extends Contract {
   /**
@@ -63,7 +66,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   }
 
   /**
-   * User can change the fee paid to executors
+   * Creator can change the fee paid to executors
    *
    * @param fee Fee in uint64 in base units of the feeToken
    */
@@ -73,7 +76,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   }
 
   /**
-   * User can change the period how ofter the script can be executed by executors
+   * Creator can change the period how ofter the script can be executed by executors
    *
    * @param period Period in seconds
    */
