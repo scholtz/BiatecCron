@@ -15,7 +15,6 @@ import { taskRenderer } from '../scripts/task/taskRenderer';
 import sha256 from '../scripts/crypto/sha256';
 import IBuildContent from '../interface/IBuildContent';
 import getAlgod from '../scripts/algo/getAlgod';
-import { BiatecCronJob23d23Client } from '../../data/23d23b32ff78b57a8913be64961ff7b29fed3bd973b46f3556de56f1fbf387be/clients/BiatecCronJob23d23Client';
 
 export const builderRouter = Router();
 
