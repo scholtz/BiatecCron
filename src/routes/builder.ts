@@ -397,7 +397,7 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
       } else if (req.params.env === 'voitest-v1') {
         feeToken = 26174498; // asa.gold voitest
       }
-
+      console.log(`bootstrap called, fee asset: ${feeToken}`);
       const compose = client.compose()[req.params.method](params, {
         // const compose = client.compose().bootstrap(params, {
         sender: signer,
