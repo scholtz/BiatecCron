@@ -35,7 +35,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   /**
    * Version of the smart contract
    */
-  version = GlobalStateKey<bytes>({ key: 'scver' });
+  version = GlobalStateKey<string>({ key: 'scver' });
 
   /**
    * Initial setup
@@ -50,7 +50,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   /**
    * Creator can update application
    */
-  updateApplication(version: bytes): void {
+  updateApplication(version: string): void {
     assert(this.txn.sender === globals.creatorAddress);
     this.version.value = version;
   }
@@ -60,6 +60,16 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
    */
   deleteApplication(): void {
     assert(this.txn.sender === globals.creatorAddress);
+  }
+
+  /**
+   * User can change the fee paid to executors
+   *
+   * @param fee Fee in uint64 in base units of the feeToken
+   */
+  setFee(fee: uint64) {
+    assert(this.txn.sender === globals.creatorAddress);
+    this.fee.value = fee;
   }
 
   /**
