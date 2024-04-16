@@ -333,7 +333,7 @@ builderRouter.get(`/file/:id/:fileName`, async (req: ExpressRequest, res: Respon
   }
 });
 
-builderRouter.post(`/tx/:id/:signer/:appId/:method/:fileName`, async (req: ExpressRequest, res: Response) => {
+builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: ExpressRequest, res: Response) => {
   try {
     if (clientFile.test(req.params.fileName)) {
       res.set('content-type', 'application/typescript');
@@ -345,11 +345,7 @@ builderRouter.post(`/tx/:id/:signer/:appId/:method/:fileName`, async (req: Expre
       */
       // eslint-disable-next-line import/no-dynamic-require, global-require, no-shadow
 
-      const algod = new algosdk.Algodv2(
-        process.env.algodToken ?? 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        process.env.algodHost ?? 'http://localhost',
-        process.env.algodPort ?? '4001'
-      );
+      const algod = getAlgod(req.params.env);
       const signer: TransactionSignerAccount = {
         addr: req.params.signer,
         // eslint-disable-next-line no-unused-vars

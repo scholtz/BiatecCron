@@ -134,12 +134,20 @@
         }
       }
     },
-    "/v1/tx/{id}/{signer}/{appId}/{method}/{fileName}": {
+    "/v1/tx/{id}/{env}/{signer}/{appId}/{method}/{fileName}": {
       "post": {
         "description": "",
         "parameters": [
           {
             "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "env",
             "in": "path",
             "required": true,
             "schema": {
