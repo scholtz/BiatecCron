@@ -14,6 +14,7 @@ import ICronJobDocument from '../interface/ICronJobDocument';
 import { taskRenderer } from '../scripts/task/taskRenderer';
 import sha256 from '../scripts/crypto/sha256';
 import IBuildContent from '../interface/IBuildContent';
+import getAlgod from '../scripts/algo/getAlgod';
 
 export const builderRouter = Router();
 
@@ -417,7 +418,7 @@ builderRouter.post(`/tx/:id/:signer/:appId/:method/:fileName`, async (req: Expre
   }
 });
 
-builderRouter.get(`/tx-create/:id/:signer/:fileName`, async (req: ExpressRequest, res: Response) => {
+builderRouter.get(`/tx-create/:id/:env/:signer/:fileName`, async (req: ExpressRequest, res: Response) => {
   try {
     if (!clientFile.test(req.params.fileName)) {
       res.status(500).send(`File not found`);
@@ -434,12 +435,7 @@ builderRouter.get(`/tx-create/:id/:signer/:fileName`, async (req: ExpressRequest
     const file = `../../data/${req.params.id}/clients/${req.params.fileName}`;
     // eslint-disable-next-line import/no-dynamic-require, global-require, no-shadow
     const clientFileImport = await import(file);
-
-    const algod = new algosdk.Algodv2(
-      process.env.algodToken ?? 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      process.env.algodHost ?? 'http://localhost',
-      process.env.algodPort ?? '4001'
-    );
+    const algod = getAlgod(req.params.env);
     const signer: TransactionSignerAccount = {
       addr: req.params.signer,
       // eslint-disable-next-line no-unused-vars

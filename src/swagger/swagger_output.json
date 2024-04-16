@@ -189,12 +189,20 @@
         }
       }
     },
-    "/v1/tx-create/{id}/{signer}/{fileName}": {
+    "/v1/tx-create/{id}/{env}/{signer}/{fileName}": {
       "get": {
         "description": "",
         "parameters": [
           {
             "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "env",
             "in": "path",
             "required": true,
             "schema": {
