@@ -15,6 +15,7 @@ import { taskRenderer } from '../scripts/task/taskRenderer';
 import sha256 from '../scripts/crypto/sha256';
 import IBuildContent from '../interface/IBuildContent';
 import getAlgod from '../scripts/algo/getAlgod';
+import { BiatecCronJob23d23Client } from '../../data/23d23b32ff78b57a8913be64961ff7b29fed3bd973b46f3556de56f1fbf387be/clients/BiatecCronJob23d23Client';
 
 export const builderRouter = Router();
 
@@ -366,7 +367,7 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
         },
         algod
       );
-      // const client = new BiatecCronJob72ed2Client(
+      // const client = new BiatecCronJob23d23Client(
       //   {
       //     sender: signer,
       //     resolveBy: 'id',
@@ -387,10 +388,21 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
         });
       }
       console.log(`building Method:${req.params.method} Params:${JSON.stringify(params)}`);
+
+      let feeToken = 0;
+      if (req.params.env === 'mainnet-v1.0') {
+        feeToken = 1241944285; // asa.gold Mainnet
+      } else if (req.params.env === 'testnet-v1.0') {
+        feeToken = 450822081; // asa.gold Testnet
+      } else if (req.params.env === 'voitest-v1') {
+        feeToken = 26174498; // asa.gold voitest
+      }
+
       const compose = client.compose()[req.params.method](params, {
         // const compose = client.compose().bootstrap(params, {
         sender: signer,
         accounts: ['SCPSTM7HIYCTAXLFFGSOKQRW24RKSPIEWSYSG52PKR2LESGRYTUGNBS7S4'],
+        assets: [feeToken],
         sendParams: {
           fee: algokit.microAlgos(3000),
           maxFee: algokit.microAlgos(4000),
