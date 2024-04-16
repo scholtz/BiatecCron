@@ -73,6 +73,16 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   }
 
   /**
+   * User can change the period how ofter the script can be executed by executors
+   *
+   * @param period Period in seconds
+   */
+  setPeriod(period: uint64) {
+    assert(this.txn.sender === globals.creatorAddress);
+    this.period.value = period;
+  }
+
+  /**
    * Creator can send pay/axfer transaction out of the smart contract
    *
    * @param amount Amount
