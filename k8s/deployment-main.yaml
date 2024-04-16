@@ -26,7 +26,7 @@ spec:
       - name: regcred
       containers:
         - name: biatec-cron-api
-          image: scholtz2/biatec-cron-api:1.2024.04.14-main
+          image: scholtz2/biatec-cron-api:1.2024.04.16-main
           imagePullPolicy: Always
           resources:
             requests:
