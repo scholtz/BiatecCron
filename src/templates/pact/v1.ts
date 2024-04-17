@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { isNumberObject } from 'util/types';
 import IBuildContent from '../../interface/IBuildContent';
 
@@ -11,7 +12,7 @@ interface IInput {
     minAssetB: string;
   };
 }
-function isNumeric(value) {
+function isNumeric(value: any) {
   return /^-?\d+$/.test(value);
 }
 // eslint-disable-next-line no-unused-vars

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import IBuildContent from '../../interface/IBuildContent';
 
 interface IInput {
@@ -12,7 +13,7 @@ interface IInput {
   };
 }
 
-function isNumeric(value) {
+function isNumeric(value: any) {
   return /^-?\d+$/.test(value);
 }
 // eslint-disable-next-line no-unused-vars
