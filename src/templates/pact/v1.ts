@@ -1,3 +1,4 @@
+import { isNumberObject } from 'util/types';
 import IBuildContent from '../../interface/IBuildContent';
 
 interface IInput {
@@ -12,13 +13,21 @@ interface IInput {
 }
 // eslint-disable-next-line no-unused-vars
 const pactSwapV1 = (input: IInput, buildContent: IBuildContent) => {
-  return `
-  // pactSwapV1
-  if(${input.inputs.token} === 0){
-    sendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.amount}});
-  }else{
-    sendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}});
+  let ret = '// pactSwapV1';
+  if (Number.isInteger(input.inputs.token)) {
+    if (input.inputs.token) {
+      ret += `\nsendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}});`;
+    } else {
+      ret += `\nsendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.amount}});`;
+    }
+  } else {
+    ret += `\nif(${input.inputs.token} === 0){
+      sendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.amount}});
+    }else{
+      sendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}});
+    }`;
   }
+  return `${ret}
   sendAppCall({
     applicationID: AppID.fromUint64(${input.inputs.contract}),
     onCompletion: OnCompletion.NoOp,
