@@ -12,7 +12,7 @@ import getIndexer from '../scripts/algo/getIndexer';
  * Executor is the runnable app which executes all scheduler tasks
  */
 const app = async () => {
-  // algokit.Config.configure({ populateAppCallResources: true });
+  algokit.Config.configure({ populateAppCallResources: true });
 
   try {
     console.log(`${new Date()} Executor started`);
@@ -38,33 +38,33 @@ const app = async () => {
         console.log('tx', tx['application-transaction']['application-id']);
         const appInfo = await algod.getApplicationByID(appId).do();
         console.log('appInfo', appInfo.params['global-state']);
-        const lastRun = appInfo.params['global-state'].find((a: any) => a.key === 'cw==');
+        const lastRun = appInfo.params['global-state'].find((a: any) => a.key === 'bA==');
         const interval = appInfo.params['global-state'].find((a: any) => a.key === 'cA==');
         const nextRun = lastRun.value.uint + interval.value.uint;
         const nextRunDate = new Date(nextRun * 1000);
-        console.log('nextRun', nextRun, nextRunDate);
-        if (nextRunDate <= new Date()) {
-          const client = new BiatecCronJobClient(
-            {
-              id: appId,
-              resolveBy: 'id',
-              sender: signer,
+        console.log(`nextRun for app ${appId}`, nextRun, nextRunDate);
+        // if (nextRunDate <= new Date()) {
+        const client = new BiatecCronJobClient(
+          {
+            id: appId,
+            resolveBy: 'id',
+            sender: signer,
+          },
+          algod
+        );
+        const exec = await client.exec(
+          {},
+          {
+            sendParams: {
+              fee: algokit.microAlgos(5000),
             },
-            algod
-          );
-          const exec = client.exec(
-            {},
-            {
-              sendParams: {
-                fee: algokit.microAlgos(4000),
-              },
-              assets: [0, 48806985, 450822081],
-              apps: [88280437],
-            }
-          );
-          console.log('exec', exec);
-        }
+            assets: [0, 48806985, 450822081],
+            apps: [88280437],
+          }
+        );
+        console.log('exec', exec);
       }
+      // }
     }
   } catch (e) {
     console.error('fatal: ', e);

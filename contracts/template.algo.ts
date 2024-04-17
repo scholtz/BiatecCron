@@ -53,9 +53,10 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   /**
    * Creator can update application
    */
-  updateApplication(version: string): void {
+  updateApplication(version: string, id: string): void {
     assert(this.txn.sender === globals.creatorAddress);
     this.version.value = version;
+    this.id.value = id;
   }
 
   /**
