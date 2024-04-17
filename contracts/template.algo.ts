@@ -26,16 +26,6 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   start = GlobalStateKey<uint64>({ key: 's' });
 
   /**
-   * Fee to be paid to executor
-   */
-  fee = GlobalStateKey<uint64>({ key: 'f' });
-
-  /**
-   * Fee token
-   */
-  feeToken = GlobalStateKey<uint64>({ key: 'ft' });
-
-  /**
    * Version of the smart contract
    */
   version = GlobalStateKey<string>({ key: 'scver' });
@@ -64,16 +54,6 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
    */
   deleteApplication(): void {
     assert(this.txn.sender === globals.creatorAddress);
-  }
-
-  /**
-   * Creator can change the fee paid to executors
-   *
-   * @param fee Fee in uint64 in base units of the feeToken
-   */
-  setFee(fee: uint64) {
-    assert(this.txn.sender === globals.creatorAddress);
-    this.fee.value = fee;
   }
 
   /**
@@ -106,50 +86,35 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
 
   /**
    * Creator can send pay/axfer transaction out of the smart contract
+   * @param sender Sender. This app id or any rekeyed account to the address of this sc
    */
-  assetTransfer(xferAsset: AssetID, assetAmount: uint64, assetReceiver: Address, note: string): void {
+  assetTransfer(sender: Address, xferAsset: AssetID, assetAmount: uint64, assetReceiver: Address, note: string): void {
     assert(this.txn.sender === globals.creatorAddress);
     sendAssetTransfer({
       assetAmount: assetAmount,
       assetReceiver: assetReceiver,
       xferAsset: xferAsset,
       note: note,
+      assetSender: sender,
     });
-    assert(this.txn.sender === globals.creatorAddress);
   }
 
   /**
    * Bootstrap the contract to optin to the fee asset and setup basic variables
    *
-   * @param id Hash id of the input app
    * @param txBaseDeposit Deposit MBR
+   * @param id Hash id of the input app
    * @param period  Period in seconds how often this smart contract can be run
    * @param start Start time in unix timestamp seconds. Contract can be exectuted when Math.floor((currentTime + start) / period) > Math.floor((lastRun + start) / period)
    */
-  bootstrap(txBaseDeposit: PayTxn, id: string, period: uint64, start: uint64, fee: uint64): void {
+  bootstrap(txBaseDeposit: PayTxn, id: string, period: uint64, start: uint64): void {
     assert(this.txn.sender === globals.creatorAddress);
     verifyPayTxn(txBaseDeposit, {
       receiver: this.app.address,
       amount: { greaterThanEqualTo: 0 },
     });
-    if (globals.genesisHash === base64Decode('StdEncoding', 'wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=')) {
-      this.feeToken.value = 1241944285; // asa.gold Mainnet
-    } else if (globals.genesisHash === base64Decode('StdEncoding', 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=')) {
-      this.feeToken.value = 450822081; // asa.gold Testnet
-    } else if (globals.genesisHash === base64Decode('StdEncoding', 'IXnoWtviVVJW5LGivNFc0Dq14V3kqaXuK2u5OQrdVZo=')) {
-      this.feeToken.value = 26174498; // asa.gold voitest
-    } else {
-      this.feeToken.value = 0;
-      // assert(false, 'Wrong network');
-    }
-    if (this.feeToken.value > 0) {
-      sendAssetTransfer({
-        assetReceiver: globals.currentApplicationAddress,
-        assetAmount: 0,
-        xferAsset: AssetID.fromUint64(this.feeToken.value),
-      });
-    }
-    let keep = 200000;
+
+    let keep = 100000;
     if (globals.minBalance > keep) keep = globals.minBalance;
     /**
      * This will send notification to cron
@@ -164,7 +129,6 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     this.id.value = id;
     this.period.value = period;
     this.start.value = start;
-    this.fee.value = fee;
   }
 
   /**
@@ -210,20 +174,6 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     );
     this.lastRun.value = globals.latestTimestamp;
 
-    // pay fees to executor
-    if (this.feeToken.value > 0) {
-      this.pendingGroup.addAssetTransfer({
-        assetReceiver: this.txn.sender,
-        assetAmount: this.fee.value,
-        xferAsset: AssetID.fromUint64(this.feeToken.value),
-        fee: 0,
-        isFirstTxn: true,
-      });
-    } else {
-      this.pendingGroup.addPayment({ fee: 0, receiver: this.txn.sender, amount: this.fee.value });
-    }
-    this.pendingGroup.submit();
-
-    __SCRIPT__;
+    // __SCRIPT__;
   }
 }

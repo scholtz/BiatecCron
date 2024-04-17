@@ -150,7 +150,7 @@ builderRouter.post('/build/:rebuild', async (req: ExpressRequest, res: Response)
     };
     const tealscript = taskRenderer(doc.tasks, buildContent);
     const data = fs.readFileSync('contracts/template.algo.ts').toString('utf-8');
-    const outTealscript = data.replace('__SCRIPT__;', tealscript).replace('__SHORT_HASH__', hashShort);
+    const outTealscript = data.replace('// __SCRIPT__;', tealscript).replace('__SHORT_HASH__', hashShort);
 
     fs.writeFileSync(`data/${hash}/BiatecCronJob${hashShort}.algo.ts`, outTealscript);
     // promisify exec
