@@ -544,7 +544,7 @@ builderRouter.get(`/tx-update/:id/:env/:appId/:signer/:fileName`, async (req: Ex
     console.log('client', client);
     const atc = new AtomicTransactionComposer();
     await client.update.updateApplication(
-      { version: new Uint8Array(Buffer.from('BIATEC-CRON-01-01-01', 'utf-8')) },
+      { version: new Uint8Array(Buffer.from('BIATEC-CRON-01-01-01', 'utf-8')), id: req.params.id },
       {
         sender: signer,
         // updatable: true,
