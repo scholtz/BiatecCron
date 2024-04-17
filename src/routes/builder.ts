@@ -496,3 +496,76 @@ builderRouter.get(`/tx-create/:id/:env/:signer/:fileName`, async (req: ExpressRe
     console.error(e);
   }
 });
+
+builderRouter.get(`/tx-update/:id/:env/:appId/:signer/:fileName`, async (req: ExpressRequest, res: Response) => {
+  try {
+    if (!clientFile.test(req.params.fileName)) {
+      res.status(500).send(`File not found`);
+      return;
+    }
+
+    res.set('content-type', 'application/typescript');
+    /*
+      51603c5716dd7721d303666f583d2c4aa3f5ffd9cee86708b5b405a2e9f1529d
+      AWALLETCPHQPJGCZ6AHLIFPHWBHUEHQ7VBYJVVGQRRY4MEIGWUBKCQYP4Y
+      exec
+      BiatecCronJob51603Client.ts
+      */
+    const algod = getAlgod(req.params.env);
+    const signer: TransactionSignerAccount = {
+      addr: req.params.signer,
+      // eslint-disable-next-line no-unused-vars
+      signer: async (txnGroup: Transaction[], indexesToSign: number[]) => {
+        return [new Uint8Array()];
+      },
+    };
+    const file = `../../data/${req.params.id}/clients/${req.params.fileName}`;
+    const clientFileImport = await import(file);
+    const clientName = req.params.fileName.replace('.ts', '');
+    const client = new clientFileImport[clientName](
+      {
+        sender: signer,
+        resolveBy: 'id',
+        id: parseInt(req.params.appId, 10),
+      },
+      algod
+    );
+    // const client = new BiatecCronJob23d23Client(
+    //   {
+    //     sender: signer,
+    //     resolveBy: 'id',
+    //     id: parseInt(req.params.appId, 10),
+    //   },
+    //   algod
+    // );
+
+    console.log('signer', signer);
+
+    console.log('client', client);
+    const atc = new AtomicTransactionComposer();
+    await client.update.updateApplication(
+      { version: new Uint8Array(Buffer.from('BIATEC-CRON-01-01-01', 'utf-8')) },
+      {
+        sender: signer,
+        // updatable: true,
+        // deletable: true,
+        sendParams: {
+          fee: algokit.microAlgos(1000),
+          atc,
+        },
+      }
+    );
+
+    res.set('content-type', 'application/json');
+    const ret = atc.buildGroup().map((tx: any) => {
+      console.log('tx', tx.txn);
+      return Buffer.from(algosdk.encodeUnsignedTransaction(tx.txn)).toString('base64');
+    });
+    res.send(JSON.stringify(ret));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    res.status(500).send(`Error occured ${e.message ?? e}`);
+    console.error(e);
+  }
+});

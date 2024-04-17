@@ -1,85 +1,71 @@
-import { taskRenderer } from '../scripts/task/taskRenderer';
-
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
+
+import algosdk, { Transaction } from 'algosdk';
+import * as algokit from '@algorandfoundation/algokit-utils';
+import { BiatecCronJobClient } from '../../contracts/clients/BiatecCronJobClient';
+import getAlgod from '../scripts/algo/getAlgod';
+import getIndexer from '../scripts/algo/getIndexer';
+
+/**
+ * Executor is the runnable app which executes all scheduler tasks
+ */
 const app = async () => {
-  console.log(`${new Date()} App started`);
+  algokit.Config.configure({ populateAppCallResources: true });
 
-  const input = {
-    schedule: {
-      period: 3600,
-      start: 0,
-    },
-    tasks: [
-      {
-        task: 'var@v1',
-        displayName: 'Oracle price',
-        inputs: {
-          var: 'var1',
-          type: 'uint64',
-          defaultValue: 0,
-        },
+  try {
+    console.log(`${new Date()} Executor started`);
+    const indexer = getIndexer(process.env.env ?? 'testnet-v1.0');
+    const algod = getAlgod(process.env.env ?? 'testnet-v1.0');
+    const txs = await indexer
+      .lookupAccountTransactions('SCPSTM7HIYCTAXLFFGSOKQRW24RKSPIEWSYSG52PKR2LESGRYTUGNBS7S4')
+      .do();
+    if (!process.env.signer) throw Error('Env variable signer is missing');
+    const signerAccount = algosdk.mnemonicToSecretKey(process.env.signer ?? '');
+    const signer = {
+      addr: signerAccount.addr,
+      // eslint-disable-next-line no-unused-vars
+      signer: async (txnGroup: Transaction[], indexesToSign: number[]) => {
+        return txnGroup.map((tx) => tx.signTxn(signerAccount.sk));
       },
-      {
-        task: 'var@v1',
-        displayName: 'Oracle price 2x',
-        inputs: {
-          var: 'var2',
-          type: 'uint64',
-          defaultValue: '0',
-        },
-      },
-      {
-        task: 'folks-oracle@v1',
-        displayName: 'Set oracle price to variable',
-        inputs: {
-          contract: 123,
-          token: 1234,
-          var: 'var1',
-        },
-      },
-      {
-        task: 'math@v1',
-        displayName: 'Multiply price',
-        inputs: {
-          formula: '2 * var1',
-          var: 'var2',
-        },
-      },
-      {
-        task: 'if@v1',
-        displayName: 'Check if ',
-        inputs: {
-          condition: '2 * var1 > var2',
-          ifTrue: [
-            {
-              task: 'pay@v1',
-              displayName: 'Pay to X',
-              inputs: {
-                receiver: 'SCH',
-                amount: 'var1',
-                token: 1234,
-              },
-            },
-          ],
-          ifFalse: [
-            {
-              task: 'pay@v1',
-              displayName: 'Pay to X',
-              inputs: {
-                receiver: 'SCH',
-                amount: 123,
-                token: 1234,
-              },
-            },
-          ],
-        },
-      },
-    ],
-  };
-  console.log(JSON.stringify(input));
-  const out = taskRenderer(input.tasks);
+    };
 
-  console.log(out);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const tx of txs.transactions) {
+      if (tx['application-transaction']) {
+        const appId = tx['application-transaction']['application-id'];
+        console.log('tx', tx['application-transaction']['application-id']);
+        const appInfo = await algod.getApplicationByID(appId).do();
+        console.log('appInfo', appInfo.params['global-state']);
+        const lastRun = appInfo.params['global-state'].find((a: any) => a.key === 'cw==');
+        const interval = appInfo.params['global-state'].find((a: any) => a.key === 'cA==');
+        const nextRun = lastRun.value.uint + interval.value.uint;
+        const nextRunDate = new Date(nextRun * 1000);
+        console.log('nextRun', nextRun, nextRunDate);
+        if (nextRunDate <= new Date()) {
+          const client = new BiatecCronJobClient(
+            {
+              id: appId,
+              resolveBy: 'id',
+              sender: signer,
+            },
+            algod
+          );
+          const exec = client.exec(
+            {},
+            {
+              sendParams: {
+                fee: algokit.microAlgos(4000),
+              },
+            }
+          );
+          console.log('exec', exec);
+        }
+      }
+    }
+  } catch (e) {
+    console.error('fatal: ', e);
+  }
 };
 
 app();

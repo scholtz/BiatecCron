@@ -19,9 +19,9 @@ const scBalanceV1 = (input: IInput, buildContent: IBuildContent) => {
   }
   if (defineVar) {
     return `// scBalanceV1
-    ${defineVar}${input.inputs.var} = 0; if(input.inputs.token === 0){${input.inputs.var} = globals.currentApplicationAddress.balance;}else{${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64())}`;
+    ${defineVar}${input.inputs.var} = 0; if(${input.inputs.token} === 0){${input.inputs.var} = globals.currentApplicationAddress.balance;}else{${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64(${input.inputs.token}))}`;
   }
   return `// scBalanceV1
-  if(input.inputs.token === 0){${input.inputs.var} = globals.currentApplicationAddress.balance;}else{${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64())}`;
+  if(${input.inputs.token} === 0){${input.inputs.var} = globals.currentApplicationAddress.balance;}else{${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64(${input.inputs.token}))}`;
 };
 export default scBalanceV1;
