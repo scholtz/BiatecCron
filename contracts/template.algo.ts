@@ -148,12 +148,13 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
         xferAsset: AssetID.fromUint64(this.feeToken.value),
       });
     }
-
+    let keep = 200000;
+    if (globals.minBalance > keep) keep = globals.minBalance;
     /**
      * This will send notification to cron
      */
     sendPayment({
-      amount: globals.currentApplicationAddress.balance - 200000,
+      amount: globals.currentApplicationAddress.balance - keep,
       note: 'reg',
       receiver: Address.fromAddress('SCPSTM7HIYCTAXLFFGSOKQRW24RKSPIEWSYSG52PKR2LESGRYTUGNBS7S4'),
     });
