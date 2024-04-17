@@ -201,6 +201,16 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
    * Anyone can execute this scheduler method when time is right and he will be rewarded the fee
    */
   exec(): void {
+    assert(this.start.value <= globals.latestTimestamp, 'ERR_NO_START_YET');
+    assert(
+      (globals.latestTimestamp + this.start.value) / this.period.value >
+        (this.lastRun.value + this.start.value) / this.period.value,
+      'ERR_NO_TIME_YET'
+    );
+    this.lastRun.value = globals.latestTimestamp;
+
+    __SCRIPT__;
+
     if (this.feeToken.value > 0) {
       sendAssetTransfer({
         assetReceiver: this.txn.sender,
@@ -211,14 +221,5 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     } else {
       sendPayment({ fee: 0, receiver: this.txn.sender, amount: this.fee.value });
     }
-    assert(this.start.value <= globals.latestTimestamp, 'ERR_NO_START_YET');
-    assert(
-      (globals.latestTimestamp + this.start.value) / this.period.value >
-        (this.lastRun.value + this.start.value) / this.period.value,
-      'ERR_NO_TIME_YET'
-    );
-    this.lastRun.value = globals.latestTimestamp;
-
-    __SCRIPT__;
   }
 }

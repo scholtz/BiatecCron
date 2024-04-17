@@ -12,7 +12,7 @@ import getIndexer from '../scripts/algo/getIndexer';
  * Executor is the runnable app which executes all scheduler tasks
  */
 const app = async () => {
-  algokit.Config.configure({ populateAppCallResources: true });
+  // algokit.Config.configure({ populateAppCallResources: true });
 
   try {
     console.log(`${new Date()} Executor started`);
@@ -58,7 +58,8 @@ const app = async () => {
               sendParams: {
                 fee: algokit.microAlgos(4000),
               },
-              assets: [0, 48806985],
+              assets: [0, 48806985, 450822081],
+              apps: [88280437],
             }
           );
           console.log('exec', exec);
