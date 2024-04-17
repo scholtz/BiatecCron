@@ -20,13 +20,13 @@ const pactSwapV1 = (input: IInput, buildContent: IBuildContent) => {
   let ret = '// pactSwapV1';
   if (isNumeric(input.inputs.sendToken)) {
     if (Number(input.inputs.sendToken) > 0) {
-      ret += `\nsendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});`;
+      ret += `\nsendAssetTransfer({fee:0,assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});`;
     } else {
-      ret += `\nsendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});`;
+      ret += `\nsendPayment({fee:0,receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});`;
     }
   } else {
     ret += `\nif(${input.inputs.sendToken} === 0){
-      sendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});
+      sendPayment({fee:0,receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});
     }else{
       sendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});
     }`;
