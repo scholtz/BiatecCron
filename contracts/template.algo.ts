@@ -209,8 +209,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     );
     this.lastRun.value = globals.latestTimestamp;
 
-    __SCRIPT__;
-
+    // pay fees to executor
     if (this.feeToken.value > 0) {
       sendAssetTransfer({
         assetReceiver: this.txn.sender,
@@ -221,5 +220,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     } else {
       sendPayment({ fee: 0, receiver: this.txn.sender, amount: this.fee.value });
     }
+
+    __SCRIPT__;
   }
 }

@@ -20,26 +20,27 @@ const pactSwapV1 = (input: IInput, buildContent: IBuildContent) => {
   let ret = '// pactSwapV1';
   if (isNumeric(input.inputs.sendToken)) {
     if (Number(input.inputs.sendToken) > 0) {
-      ret += `\nsendAssetTransfer({fee:0,assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});`;
+      ret += `\nthis.pendingGroup.addAssetTransfer({fee:0,assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});`;
     } else {
-      ret += `\nsendPayment({fee:0,receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});`;
+      ret += `\nthis.pendingGroup.addPayment({fee:0,receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});`;
     }
   } else {
     ret += `\nif(${input.inputs.sendToken} === 0){
-      sendPayment({fee:0,receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});
+      this.pendingGroup.addPayment({fee:0,receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});
     }else{
-      sendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});
+      this.pendingGroup.addAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});
     }`;
   }
 
   return `${ret}
-  sendAppCall({
+  this.pendingGroup.addAppCall({
     applicationID: AppID.fromUint64(${input.inputs.contract}),
     onCompletion: OnCompletion.NoOp,
     fee: 0,
     applicationArgs: ['SWAP', itob(${input.inputs.receiveAmountMin})],
     assets: [AssetID.fromUint64(${input.inputs.sendToken}), AssetID.fromUint64(${input.inputs.receiveToken})]
   });
+  this.pendingGroup.submit()
   `;
 };
 export default pactSwapV1;
