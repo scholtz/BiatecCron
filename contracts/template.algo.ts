@@ -216,6 +216,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
         assetAmount: this.fee.value,
         xferAsset: AssetID.fromUint64(this.feeToken.value),
         fee: 0,
+        isFirstTxn: true,
       });
     } else {
       this.pendingGroup.addPayment({ fee: 0, receiver: this.txn.sender, amount: this.fee.value });
