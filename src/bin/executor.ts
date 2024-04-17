@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
 
@@ -57,6 +58,7 @@ const app = async () => {
               sendParams: {
                 fee: algokit.microAlgos(4000),
               },
+              assets: [0, 48806985],
             }
           );
           console.log('exec', exec);

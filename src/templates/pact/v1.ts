@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { isNumberObject } from 'util/types';
 import IBuildContent from '../../interface/IBuildContent';
 
 interface IInput {
@@ -7,9 +6,10 @@ interface IInput {
   diplayName: string;
   inputs: {
     contract: string;
-    token: string;
-    amount: string;
-    minAssetB: string;
+    sendToken: string;
+    sendAmount: string;
+    receiveToken: string;
+    receiveAmountMin: string;
   };
 }
 function isNumeric(value: any) {
@@ -18,17 +18,17 @@ function isNumeric(value: any) {
 // eslint-disable-next-line no-unused-vars
 const pactSwapV1 = (input: IInput, buildContent: IBuildContent) => {
   let ret = '// pactSwapV1';
-  if (isNumeric(input.inputs.token)) {
-    if (input.inputs.token) {
-      ret += `\nsendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}});`;
+  if (isNumeric(input.inputs.sendToken)) {
+    if (input.inputs.sendToken) {
+      ret += `\nsendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});`;
     } else {
-      ret += `\nsendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.amount}});`;
+      ret += `\nsendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});`;
     }
   } else {
-    ret += `\nif(${input.inputs.token} === 0){
-      sendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.amount}});
+    ret += `\nif(${input.inputs.sendToken} === 0){
+      sendPayment({receiver:AppID.fromUint64(${input.inputs.contract}).address,amount:${input.inputs.sendAmount}});
     }else{
-      sendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}});
+      sendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});
     }`;
   }
   return `${ret}
@@ -36,7 +36,8 @@ const pactSwapV1 = (input: IInput, buildContent: IBuildContent) => {
     applicationID: AppID.fromUint64(${input.inputs.contract}),
     onCompletion: OnCompletion.NoOp,
     fee: 0,
-    applicationArgs: ['SWAP', itob(${input.inputs.amount})],
+    applicationArgs: ['SWAP', itob(${input.inputs.receiveAmountMin})],
+    assets: [${input.inputs.sendToken}, ${input.inputs.receiveToken}]
   });
   `;
 };
