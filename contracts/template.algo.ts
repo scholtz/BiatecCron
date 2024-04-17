@@ -201,7 +201,16 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
    * Anyone can execute this scheduler method when time is right and he will be rewarded the fee
    */
   exec(): void {
-    sendPayment({ fee: 0, receiver: this.txn.sender, amount: this.fee.value });
+    if (this.feeToken.value > 0) {
+      sendAssetTransfer({
+        assetReceiver: this.txn.sender,
+        assetAmount: this.fee.value,
+        xferAsset: AssetID.fromUint64(this.feeToken.value),
+        fee: 0,
+      });
+    } else {
+      sendPayment({ fee: 0, receiver: this.txn.sender, amount: this.fee.value });
+    }
     assert(this.start.value <= globals.latestTimestamp, 'ERR_NO_START_YET');
     assert(
       (globals.latestTimestamp + this.start.value) / this.period.value >
