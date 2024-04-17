@@ -31,13 +31,14 @@ const pactSwapV1 = (input: IInput, buildContent: IBuildContent) => {
       sendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.sendToken}),assetAmount:${input.inputs.sendAmount}});
     }`;
   }
+
   return `${ret}
   sendAppCall({
     applicationID: AppID.fromUint64(${input.inputs.contract}),
     onCompletion: OnCompletion.NoOp,
     fee: 0,
     applicationArgs: ['SWAP', itob(${input.inputs.receiveAmountMin})],
-    assets: [${input.inputs.sendToken}, ${input.inputs.receiveToken}]
+    assets: [AssetID.fromUint64(${input.inputs.sendToken}), AssetID.fromUint64(${input.inputs.receiveToken})]
   });
   `;
 };
