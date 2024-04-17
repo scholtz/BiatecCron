@@ -29,17 +29,18 @@ const payV1 = (input: IInput, buildContent: IBuildContent) => {
   let ret = '// payV1';
   if (isNumeric(input.inputs.token)) {
     if (input.inputs.token) {
-      ret += `\nsendAssetTransfer({assetReceiver:addr(${input.inputs.receiver}),xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}${addFeeStr}${addNoteStr}});`;
+      ret += `\nthis.pendingGroup.addAssetTransfer({assetReceiver:addr(${input.inputs.receiver}),xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}${addFeeStr}${addNoteStr}});`;
     } else {
-      ret += `\nsendPayment({receiver:addr(${input.inputs.receiver}),amount:${input.inputs.amount}${addFeeStr}${addNoteStr}});`;
+      ret += `\nthis.pendingGroup.addPayment({receiver:addr(${input.inputs.receiver}),amount:${input.inputs.amount}${addFeeStr}${addNoteStr}});`;
     }
   } else {
     ret += `\nif(${input.inputs.token} === 0){
-      sendPayment({receiver:addr(${input.inputs.receiver}),amount:${input.inputs.amount}${addFeeStr}${addNoteStr}});
+      this.pendingGroup.addPayment({receiver:addr(${input.inputs.receiver}),amount:${input.inputs.amount}${addFeeStr}${addNoteStr}});
     }else{
-      sendAssetTransfer({assetReceiver:addr(${input.inputs.receiver}),xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}${addFeeStr}${addNoteStr}});
+      this.pendingGroup.addAssetTransfer({assetReceiver:addr(${input.inputs.receiver}),xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}${addFeeStr}${addNoteStr}});
     }`;
   }
+  ret += '\nthis.pendingGroup.submit();';
   return ret;
 };
 export default payV1;

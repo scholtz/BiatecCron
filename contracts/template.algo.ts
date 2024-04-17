@@ -211,15 +211,16 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
 
     // pay fees to executor
     if (this.feeToken.value > 0) {
-      sendAssetTransfer({
+      this.pendingGroup.addAssetTransfer({
         assetReceiver: this.txn.sender,
         assetAmount: this.fee.value,
         xferAsset: AssetID.fromUint64(this.feeToken.value),
         fee: 0,
       });
     } else {
-      sendPayment({ fee: 0, receiver: this.txn.sender, amount: this.fee.value });
+      this.pendingGroup.addPayment({ fee: 0, receiver: this.txn.sender, amount: this.fee.value });
     }
+    this.pendingGroup.submit();
 
     __SCRIPT__;
   }
