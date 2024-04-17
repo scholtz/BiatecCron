@@ -11,6 +11,10 @@ interface IInput {
     fee: string | undefined;
   };
 }
+
+function isNumeric(value) {
+  return /^-?\d+$/.test(value);
+}
 // eslint-disable-next-line no-unused-vars
 const payV1 = (input: IInput, buildContent: IBuildContent) => {
   let addFeeStr = '';
@@ -22,7 +26,7 @@ const payV1 = (input: IInput, buildContent: IBuildContent) => {
     addNoteStr = `,fee:${input.inputs.note}`;
   }
   let ret = '// payV1';
-  if (Number.isInteger(input.inputs.token)) {
+  if (isNumeric(input.inputs.token)) {
     if (input.inputs.token) {
       ret += `\nsendAssetTransfer({assetReceiver:addr(${input.inputs.receiver}),xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}${addFeeStr}${addNoteStr}});`;
     } else {

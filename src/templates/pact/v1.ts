@@ -11,10 +11,13 @@ interface IInput {
     minAssetB: string;
   };
 }
+function isNumeric(value) {
+  return /^-?\d+$/.test(value);
+}
 // eslint-disable-next-line no-unused-vars
 const pactSwapV1 = (input: IInput, buildContent: IBuildContent) => {
   let ret = '// pactSwapV1';
-  if (Number.isInteger(input.inputs.token)) {
+  if (isNumeric(input.inputs.token)) {
     if (input.inputs.token) {
       ret += `\nsendAssetTransfer({assetReceiver:AppID.fromUint64(${input.inputs.contract}).address,xferAsset:AssetID.fromUint64(${input.inputs.token}),assetAmount:${input.inputs.amount}});`;
     } else {
