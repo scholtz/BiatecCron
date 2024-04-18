@@ -6,7 +6,6 @@ import algosdk, { AtomicTransactionComposer, Transaction } from 'algosdk';
 import * as algokit from '@algorandfoundation/algokit-utils';
 import { setTimeout } from 'node:timers/promises';
 import getAlgod from '../scripts/algo/getAlgod';
-import getIndexer from '../scripts/algo/getIndexer';
 import getPoolManagerApp from '../scripts/scheduler/getPoolManagerApp';
 import parseBoxData from '../scripts/scheduler/parseBoxData';
 import { ITaskBox } from '../interface/ITaskBox';
@@ -17,7 +16,7 @@ import { BiatecCronJobShortHashClient } from '../../contracts/clients/BiatecCron
  * Executor is the runnable app which executes all scheduler tasks
  */
 const app = async () => {
-  // algokit.Config.configure({ populateAppCallResources: true });
+  //  algokit.Config.configure({ populateAppCallResources: true });
   const fairUsageTimeout = 500;
   try {
     if (!process.env.signer) throw Error('Env variable signer is missing');
@@ -32,7 +31,6 @@ const app = async () => {
 
     console.log(`${new Date()} Executor started`);
     const env = process.env.env ?? 'localhost';
-    const indexer = getIndexer(env);
     const algod = getAlgod(env);
     const appPoolId = getPoolManagerApp(env);
     const boexes = await algod.getApplicationBoxes(appPoolId).do();
@@ -90,6 +88,7 @@ const app = async () => {
               fee: algokit.microAlgos(5000),
               atc,
             },
+            apps: [],
           }
         );
         const txsGroup = atc.buildGroup().map((tx) => tx.txn);
@@ -100,6 +99,12 @@ const app = async () => {
             allowUnnamedResources: true,
             allowEmptySignatures: true,
             allowMoreLogging: true,
+            execTraceConfig: new algosdk.modelsv2.SimulateTraceConfig({
+              enable: true,
+              scratchChange: true,
+              stackChange: true,
+              stateChange: true,
+            }),
             txnGroups: [
               new algosdk.modelsv2.SimulateRequestTransactionGroup({
                 txns: signed.map((txn) => algosdk.decodeObj(txn)) as algosdk.EncodedSignedTransaction[],
@@ -107,13 +112,14 @@ const app = async () => {
             ],
           })
         );
+        console.log('simulate', JSON.stringify(simulate));
 
         console.log('simulate', simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed);
         const assets =
           simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed?.assets?.map((a) => Number(a)) ?? [];
-        assets.push(0);
-        assets.push(48806985);
-        assets.push(450822081);
+        // assets.push(0);
+        // assets.push(48806985);
+        // assets.push(450822081);
         const boxes =
           simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed?.boxes?.map((a) => a as any) ?? [];
         boxes.push({
@@ -138,6 +144,9 @@ const app = async () => {
           }
         );
         const txs = atc2.buildGroup().map((tx) => tx.txn);
+        // if (2 > 1) {
+        //   throw Error('fail here');
+        // }
         console.log('going to execute');
         await execClient.executeTask(
           {
@@ -157,47 +166,6 @@ const app = async () => {
       } catch (e) {
         console.error(`Error while executing app ${run.app}`, e);
       }
-    }
-
-    if (2 > 1) return;
-    const txs = await indexer
-      .lookupAccountTransactions('SCPSTM7HIYCTAXLFFGSOKQRW24RKSPIEWSYSG52PKR2LESGRYTUGNBS7S4')
-      .do();
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const tx of txs.transactions) {
-      if (tx['application-transaction']) {
-        const appId = tx['application-transaction']['application-id'];
-        console.log('tx', tx['application-transaction']['application-id']);
-        const appInfo = await algod.getApplicationByID(appId).do();
-        console.log('appInfo', appInfo.params['global-state']);
-        const lastRun = appInfo.params['global-state'].find((a: any) => a.key === 'bA==');
-        const interval = appInfo.params['global-state'].find((a: any) => a.key === 'cA==');
-        const nextRun = lastRun.value.uint + interval.value.uint;
-        const nextRunDate = new Date(nextRun * 1000);
-        console.log(`nextRun for app ${appId}`, nextRun, nextRunDate);
-        // if (nextRunDate <= new Date()) {
-        const client = new BiatecCronJobShortHashClient(
-          {
-            id: appId,
-            resolveBy: 'id',
-            sender: signer,
-          },
-          algod
-        );
-        const exec = await client.exec(
-          {},
-          {
-            sendParams: {
-              fee: algokit.microAlgos(5000),
-            },
-            assets: [0, 48806985, 450822081],
-            apps: [88280437],
-          }
-        );
-        console.log('exec', exec);
-      }
-      // }
     }
   } catch (e) {
     console.error('fatal: ', e);
