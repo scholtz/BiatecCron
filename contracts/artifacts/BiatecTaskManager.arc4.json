@@ -1,0 +1,218 @@
+{
+  "name": "BiatecTaskManager",
+  "desc": "",
+  "methods": [
+    {
+      "name": "createApplication",
+      "desc": "Initial setup",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "updateApplication",
+      "desc": "Creator can update application",
+      "args": [
+        {
+          "name": "version",
+          "type": "string",
+          "desc": "App version"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "bootstrap",
+      "desc": "Bootstrap the contract to optin to the fee asset and setup basic variables",
+      "args": [
+        {
+          "name": "txBaseDeposit",
+          "type": "pay",
+          "desc": "Deposit MBR"
+        },
+        {
+          "name": "feeAssetId",
+          "type": "uint64",
+          "desc": "Fee asset id"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "registerTask",
+      "desc": "Register a task to be executedOnly app it self can call register task",
+      "args": [
+        {
+          "name": "registrationFeeDeposit",
+          "type": "pay",
+          "desc": "The axfer or pay that deposits the initial funds"
+        },
+        {
+          "name": "task",
+          "type": "(uint64,uint64,uint64)",
+          "desc": "The task object"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "executeTask",
+      "desc": "Execute a task and get the reward",
+      "args": [
+        {
+          "name": "taskAppCall",
+          "type": "appl",
+          "desc": "The call to the task app"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "fundTask",
+      "desc": "Deposit funds for a task",
+      "args": [
+        {
+          "name": "taskAppId",
+          "type": "uint64",
+          "desc": "The ID of the task to fund"
+        },
+        {
+          "name": "deposit",
+          "type": "txn",
+          "desc": "The pay or axfer to fund the task"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "unfundTask",
+      "desc": "Remove funds for a taskCreator of the underlying task can remove the funds from the pool",
+      "args": [
+        {
+          "name": "taskAppId",
+          "type": "uint64",
+          "desc": "The ID of the task to fund"
+        },
+        {
+          "name": "amount",
+          "type": "uint64",
+          "desc": "The amount to withdraw from the pool"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "payment",
+      "desc": "Creator can send pay/axfer transaction out of the smart contract",
+      "args": [
+        {
+          "name": "sender",
+          "type": "address",
+          "desc": "Sender. This app id or any rekeyed account to the address of this sc"
+        },
+        {
+          "name": "amount",
+          "type": "uint64",
+          "desc": "Amount"
+        },
+        {
+          "name": "receiver",
+          "type": "address",
+          "desc": "Receiver"
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "desc": "Note"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "assetTransfer",
+      "desc": "Creator can send pay/axfer transaction out of the smart contract",
+      "args": [
+        {
+          "name": "sender",
+          "type": "address",
+          "desc": "Sender. This app id or any rekeyed account to the address of this sc"
+        },
+        {
+          "name": "xferAsset",
+          "type": "uint64"
+        },
+        {
+          "name": "assetAmount",
+          "type": "uint64"
+        },
+        {
+          "name": "assetReceiver",
+          "type": "address"
+        },
+        {
+          "name": "note",
+          "type": "string"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "sendOnlineKeyRegistration",
+      "desc": "Creator can perfom key registration for this LP pool",
+      "args": [
+        {
+          "name": "votePk",
+          "type": "byte[]"
+        },
+        {
+          "name": "selectionPk",
+          "type": "byte[]"
+        },
+        {
+          "name": "stateProofPk",
+          "type": "byte[]"
+        },
+        {
+          "name": "voteFirst",
+          "type": "uint64"
+        },
+        {
+          "name": "voteLast",
+          "type": "uint64"
+        },
+        {
+          "name": "voteKeyDilution",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "sendOfflineKeyRegistration",
+      "desc": "Creator can perfom key unregistration for this LP pool",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}

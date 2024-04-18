@@ -15,6 +15,7 @@ import { taskRenderer } from '../scripts/task/taskRenderer';
 import sha256 from '../scripts/crypto/sha256';
 import IBuildContent from '../interface/IBuildContent';
 import getAlgod from '../scripts/algo/getAlgod';
+import getPoolManagerApp from '../scripts/scheduler/getPoolManagerApp';
 
 export const builderRouter = Router();
 
@@ -376,16 +377,7 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
       // );
       console.log('client', client);
       const params = req.body;
-      params.id = req.params.id;
       const suggestedParams = await algod.getTransactionParams().do();
-      if (req.params.method === 'bootstrap') {
-        params.txBaseDeposit = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-          amount: 1_000_000,
-          from: req.params.signer,
-          to: algosdk.getApplicationAddress(appId),
-          suggestedParams: { ...suggestedParams, fee: 0 },
-        });
-      }
       console.log(`building Method:${req.params.method} Params:${JSON.stringify(params)}`);
 
       let feeToken = 0;
@@ -396,12 +388,39 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
       } else if (req.params.env === 'voitest-v1') {
         feeToken = 26174498; // asa.gold voitest
       }
+      const appPoolManager = getPoolManagerApp(req.params.env);
+
       console.log(`bootstrap called, fee asset: ${feeToken}`);
-      const compose = client.compose()[req.params.method](params, {
+
+      const sendParams =
+        req.params.method === 'bootstrap'
+          ? {
+              appPoolManager,
+              txBaseDeposit: algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+                amount: 1_000_000,
+                from: req.params.signer,
+                to: algosdk.getApplicationAddress(appId),
+                suggestedParams: { ...suggestedParams, fee: 0 },
+              }),
+              id: req.params.id,
+              period: params.period,
+              start: params.start,
+              fee: params.fee,
+            }
+          : params;
+      console.log('sendParams', sendParams);
+      const boxRef = {
+        // : algosdk.BoxReference
+        appIndex: appPoolManager,
+        name: algosdk.bigIntToBytes(appId, 8),
+      };
+      const compose = client.compose()[req.params.method](sendParams, {
         // const compose = client.compose().bootstrap(params, {
         sender: signer,
-        accounts: ['SCPSTM7HIYCTAXLFFGSOKQRW24RKSPIEWSYSG52PKR2LESGRYTUGNBS7S4'],
+        accounts: [],
         assets: [feeToken],
+        apps: [appPoolManager],
+        boxes: [boxRef],
         sendParams: {
           fee: algokit.microAlgos(3000),
           maxFee: algokit.microAlgos(4000),

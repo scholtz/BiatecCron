@@ -12,7 +12,8 @@
     "fix": "eslint . --ext .ts --fix",
     "exec": "ts-node src/bin/executor.ts",
     "server": "ts-node src/bin/server.ts",
-    "gen-swagger": "ts-node src/bin/swagger.ts"
+    "gen-swagger": "ts-node src/bin/swagger.ts",
+    "deploy-task-manager": "ts-node src/bin/deployTaskManager.ts"
   },
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^5.8.0",

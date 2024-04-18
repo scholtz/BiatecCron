@@ -1,5 +1,14 @@
 import { Contract } from '@algorandfoundation/tealscript';
 
+/** Task manager task */
+type Task = {
+  /** The amount of funds availible that will pay for the task */
+  funds: uint64;
+  /** The app to execute */
+  app: AppID;
+  /** The amount of the assetId rewarded to the executor */
+  fee: uint64;
+};
 /**
  * Decentralized scheduler task - https://scheduler.biatec.io
  */
@@ -73,41 +82,51 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
    * @param note Note
    * @param receiver Receiver
    */
-  payment(sender: Address, amount: uint64, receiver: Address, note: string): void {
+  payment(amount: uint64, receiver: Address, note: string): void {
     assert(this.txn.sender === globals.creatorAddress);
     sendPayment({
       amount: amount,
       receiver: receiver,
       note: note,
-      sender: sender,
     });
     assert(this.txn.sender === globals.creatorAddress);
   }
 
   /**
    * Creator can send pay/axfer transaction out of the smart contract
-   * @param sender Sender. This app id or any rekeyed account to the address of this sc
+   * @param xferAsset Asset id
+   * @param assetAmount Amount
+   * @param note Note
+   * @param assetReceiver Receiver
    */
-  assetTransfer(sender: Address, xferAsset: AssetID, assetAmount: uint64, assetReceiver: Address, note: string): void {
+  assetTransfer(xferAsset: AssetID, assetAmount: uint64, assetReceiver: Address, note: string): void {
     assert(this.txn.sender === globals.creatorAddress);
     sendAssetTransfer({
       assetAmount: assetAmount,
       assetReceiver: assetReceiver,
       xferAsset: xferAsset,
       note: note,
-      assetSender: sender,
     });
   }
 
   /**
    * Bootstrap the contract to optin to the fee asset and setup basic variables
    *
+   * @param appPoolManager Tasks Pool manager app
    * @param txBaseDeposit Deposit MBR
    * @param id Hash id of the input app
    * @param period  Period in seconds how often this smart contract can be run
    * @param start Start time in unix timestamp seconds. Contract can be exectuted when Math.floor((currentTime + start) / period) > Math.floor((lastRun + start) / period)
+   * @param fee Execution fee for the task
    */
-  bootstrap(txBaseDeposit: PayTxn, id: string, period: uint64, start: uint64): void {
+  bootstrap(
+    appPoolManager: AppID,
+    txBaseDeposit: PayTxn,
+    id: string,
+    period: uint64,
+    start: uint64,
+    fee: uint64
+  ): void {
     assert(this.txn.sender === globals.creatorAddress);
     verifyPayTxn(txBaseDeposit, {
       receiver: this.app.address,
@@ -119,10 +138,25 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     /**
      * This will send notification to cron
      */
-    sendPayment({
-      amount: globals.currentApplicationAddress.balance - keep,
-      note: 'reg',
-      receiver: Address.fromAddress('SCPSTM7HIYCTAXLFFGSOKQRW24RKSPIEWSYSG52PKR2LESGRYTUGNBS7S4'),
+    const task: Task = {
+      app: globals.currentApplicationID,
+      fee: fee,
+      funds: 0,
+    };
+
+    sendMethodCall<[PayTxn, Task], void>({
+      name: 'registerTask',
+      methodArgs: [
+        {
+          amount: globals.currentApplicationAddress.balance - keep,
+          note: 'reg',
+          receiver: appPoolManager.address,
+          fee: 0,
+        },
+        task,
+      ],
+      applicationID: appPoolManager,
+      fee: 0,
     });
 
     assert(period > 0);

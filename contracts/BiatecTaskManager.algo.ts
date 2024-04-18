@@ -19,6 +19,11 @@ export class BiatecTaskManager extends Contract {
   feeAssetId = GlobalStateKey<uint64>({ key: 'fa' });
 
   /**
+   * Sum of all deposited funds
+   */
+  depositedFunds = GlobalStateKey<uint64>({ key: 'd' });
+
+  /**
    * Version of the smart contract
    */
   version = GlobalStateKey<string>({ key: 'scver' });
@@ -100,6 +105,7 @@ export class BiatecTaskManager extends Contract {
    * @param taskAppCall The call to the task app
    */
   executeTask(taskAppCall: AppCallTxn): void {
+    // task
     const task = this.tasks(taskAppCall.applicationID).value;
 
     // send the reward
@@ -134,13 +140,45 @@ export class BiatecTaskManager extends Contract {
       verifyPayTxn(deposit, {
         receiver: this.app.address,
       });
-      task.funds += deposit.amount;
+      const fee = deposit.amount / 100;
+      task.funds += deposit.amount - fee;
+      this.depositedFunds.value += deposit.amount - fee;
     } else {
       verifyAssetTransferTxn(deposit, {
         assetReceiver: this.app.address,
         xferAsset: AssetID.fromUint64(this.feeAssetId.value),
       });
-      task.funds += deposit.assetAmount;
+      const fee = deposit.amount / 100;
+      task.funds += deposit.assetAmount - fee;
+      this.depositedFunds.value += deposit.assetAmount - fee;
+    }
+  }
+
+  /**
+   * Remove funds for a task
+   * Creator of the underlying task can remove the funds from the pool
+   *
+   * @param taskAppId The ID of the task to fund
+   * @param amount The amount to withdraw from the pool
+   */
+  unfundTask(taskAppId: AppID, amount: uint64): void {
+    const task = this.tasks(taskAppId).value;
+    assert(this.txn.sender === task.app.creator);
+    task.funds -= amount;
+    this.depositedFunds.value -= amount;
+    if (this.feeAssetId.value === 0) {
+      sendPayment({
+        amount: amount,
+        receiver: this.txn.sender,
+        fee: 0,
+      });
+    } else {
+      sendAssetTransfer({
+        assetAmount: amount,
+        xferAsset: AssetID.fromUint64(this.feeAssetId.value),
+        assetReceiver: this.txn.sender,
+        fee: 0,
+      });
     }
   }
 
@@ -154,6 +192,10 @@ export class BiatecTaskManager extends Contract {
    */
   payment(sender: Address, amount: uint64, receiver: Address, note: string): void {
     assert(this.txn.sender === globals.creatorAddress);
+    if (this.feeAssetId.value === 0) {
+      // do not allow to withdraw more funds than is deposited by clients
+      assert(globals.currentApplicationAddress.balance - amount >= this.depositedFunds.value);
+    }
     sendPayment({
       amount: amount,
       receiver: receiver,
@@ -168,6 +210,10 @@ export class BiatecTaskManager extends Contract {
    */
   assetTransfer(sender: Address, xferAsset: AssetID, assetAmount: uint64, assetReceiver: Address, note: string): void {
     assert(this.txn.sender === globals.creatorAddress);
+    if (this.feeAssetId.value === xferAsset.id) {
+      // do not allow to withdraw more funds than is deposited by clients
+      assert(globals.currentApplicationAddress.assetBalance(xferAsset) - assetAmount >= this.depositedFunds.value);
+    }
     sendAssetTransfer({
       assetAmount: assetAmount,
       assetReceiver: assetReceiver,

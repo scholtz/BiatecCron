@@ -1,0 +1,194 @@
+{
+  "name": "BiatecCronJob__SHORT_HASH__",
+  "desc": "",
+  "methods": [
+    {
+      "name": "createApplication",
+      "desc": "Initial setup",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "updateApplication",
+      "desc": "Creator can update application",
+      "args": [
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "deleteApplication",
+      "desc": "Creator can delete application",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "setPeriod",
+      "desc": "Creator can change the period how ofter the script can be executed by executors",
+      "args": [
+        {
+          "name": "period",
+          "type": "uint64",
+          "desc": "Period in seconds"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "payment",
+      "desc": "Creator can send pay/axfer transaction out of the smart contract",
+      "args": [
+        {
+          "name": "amount",
+          "type": "uint64",
+          "desc": "Amount"
+        },
+        {
+          "name": "receiver",
+          "type": "address",
+          "desc": "Receiver"
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "desc": "Note"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "assetTransfer",
+      "desc": "Creator can send pay/axfer transaction out of the smart contract",
+      "args": [
+        {
+          "name": "xferAsset",
+          "type": "uint64",
+          "desc": "Asset id"
+        },
+        {
+          "name": "assetAmount",
+          "type": "uint64",
+          "desc": "Amount"
+        },
+        {
+          "name": "assetReceiver",
+          "type": "address",
+          "desc": "Receiver"
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "desc": "Note"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "bootstrap",
+      "desc": "Bootstrap the contract to optin to the fee asset and setup basic variables",
+      "args": [
+        {
+          "name": "appPoolManager",
+          "type": "uint64",
+          "desc": "Tasks Pool manager app"
+        },
+        {
+          "name": "txBaseDeposit",
+          "type": "pay",
+          "desc": "Deposit MBR"
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "desc": "Hash id of the input app"
+        },
+        {
+          "name": "period",
+          "type": "uint64",
+          "desc": "Period in seconds how often this smart contract can be run"
+        },
+        {
+          "name": "start",
+          "type": "uint64",
+          "desc": "Start time in unix timestamp seconds. Contract can be exectuted when Math.floor((currentTime + start) / period)>Math.floor((lastRun + start) / period)"
+        },
+        {
+          "name": "fee",
+          "type": "uint64",
+          "desc": "Execution fee for the task"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "sendOnlineKeyRegistration",
+      "desc": "Creator can perfom key registration for this LP pool",
+      "args": [
+        {
+          "name": "votePk",
+          "type": "byte[]"
+        },
+        {
+          "name": "selectionPk",
+          "type": "byte[]"
+        },
+        {
+          "name": "stateProofPk",
+          "type": "byte[]"
+        },
+        {
+          "name": "voteFirst",
+          "type": "uint64"
+        },
+        {
+          "name": "voteLast",
+          "type": "uint64"
+        },
+        {
+          "name": "voteKeyDilution",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "sendOfflineKeyRegistration",
+      "desc": "Creator can perfom key unregistration for this LP pool",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "exec",
+      "desc": "Anyone can execute this scheduler method when time is right and he will be rewarded the fee",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}
