@@ -68,7 +68,7 @@ const app = async () => {
       },
       algod
     );
-
+    const execClientState = await execClient.getGlobalState();
     // eslint-disable-next-line no-restricted-syntax
     for (const run of Object.values(toExec)) {
       try {
@@ -81,6 +81,7 @@ const app = async () => {
           algod
         );
         const atc = new AtomicTransactionComposer();
+        const assets = [0];
         await client.exec(
           {},
           {
@@ -89,6 +90,7 @@ const app = async () => {
               atc,
             },
             apps: [],
+            assets,
           }
         );
         const txsGroup = atc.buildGroup().map((tx) => tx.txn);
@@ -115,11 +117,9 @@ const app = async () => {
         console.log('simulate', JSON.stringify(simulate));
 
         console.log('simulate', simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed);
-        const assets =
+        const assetsSim =
           simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed?.assets?.map((a) => Number(a)) ?? [];
-        // assets.push(0);
-        // assets.push(48806985);
-        // assets.push(450822081);
+        assetsSim.forEach((a) => assets.push(a));
         const boxes =
           simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed?.boxes?.map((a) => a as any) ?? [];
         boxes.push({
@@ -129,12 +129,13 @@ const app = async () => {
         const apps = simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed?.apps?.map((a) => Number(a)) ?? [];
         apps.push(appPoolId);
         apps.push(run.app);
+        console.log('assets', assets);
         const atc2 = new AtomicTransactionComposer();
         await client.exec(
           {},
           {
             sendParams: {
-              fee: algokit.microAlgos(5000),
+              fee: algokit.microAlgos(0),
               atc: atc2,
             },
             assets,
@@ -147,6 +148,7 @@ const app = async () => {
         // if (2 > 1) {
         //   throw Error('fail here');
         // }
+        assets.push(Number(execClientState.fa?.asNumber() ?? 0));
         console.log('going to execute');
         await execClient.executeTask(
           {
