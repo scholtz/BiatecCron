@@ -18,7 +18,7 @@ const folksOracleV1 = (input: IInput, buildContent: IBuildContent) => {
   buildContent.objectIter += 1;
   //  return `const ${input.inputs.var} = btoi((AppID.fromUint64(${input.inputs.contract}).globalState(itob(${input.inputs.token})) as bytes).substring(0, 8));`;
   let ret = '// folksOracleV1';
-  ret += `const ${tmpVar} = AppID.fromUint64(${input.inputs.contract}).globalState(itob(${input.inputs.token})) as bytes;\n`;
+  ret += `\nconst ${tmpVar} = AppID.fromUint64(${input.inputs.contract}).globalState(itob(${input.inputs.token})) as bytes;\n`;
   ret += `${defineVar}${input.inputs.var} = btoi(${tmpVar}.substring(0, 8));`;
   return ret;
 };
