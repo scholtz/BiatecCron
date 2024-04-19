@@ -13,6 +13,9 @@ export class BiatecTaskManager extends Contract {
   /** All of the available tasks */
   tasks = BoxMap<AppID, Task>();
 
+  /** All of the available tasks */
+  user2tasks = BoxMap<Address, AppID[]>();
+
   /**
    * Fee token - asset id, 0 for native token
    */
@@ -97,6 +100,33 @@ export class BiatecTaskManager extends Contract {
     assert(registrationFeeDeposit.amount > 500_000);
 
     this.tasks(task.app).value = task;
+    if (this.user2tasks(task.app.creator).exists) {
+      this.user2tasks(task.app.creator).value.push(task.app);
+    } else {
+      const newWhitelist: AppID[] = [task.app];
+      this.user2tasks(task.app.creator).value = newWhitelist;
+    }
+  }
+
+  /**
+   * Unregister a task when task is deleted
+   *
+   * @param app App to unregister
+   */
+  unregisterTask(app: AppID): void {
+    assert(this.txn.sender === app.address); // only the app itself can unregister
+    const task = this.tasks(app).value;
+    if (task.funds > 0) {
+      sendAssetTransfer({
+        assetAmount: task.funds,
+        assetReceiver: app.creator,
+        xferAsset: AssetID.fromUint64(this.feeAssetId.value),
+        fee: 0,
+      });
+    }
+    task.funds = 0;
+    this.tasks(app).delete();
+    // const index = this.user2tasks(app.creator).value.indexOf(app)
   }
 
   /**

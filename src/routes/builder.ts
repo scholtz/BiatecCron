@@ -16,6 +16,7 @@ import sha256 from '../scripts/crypto/sha256';
 import IBuildContent from '../interface/IBuildContent';
 import getAlgod from '../scripts/algo/getAlgod';
 import getPoolManagerApp from '../scripts/scheduler/getPoolManagerApp';
+// import { BiatecCronJobShortHashClient } from '../../contracts/clients/BiatecCronJob__SHORT_HASH__Client';
 
 export const builderRouter = Router();
 
@@ -375,7 +376,7 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
       //   },
       //   algod
       // );
-      console.log('client', client);
+      // console.log('client', client);
       const params = req.body;
       const suggestedParams = await algod.getTransactionParams().do();
       console.log(`building Method:${req.params.method} Params:${JSON.stringify(params)}`);
@@ -408,19 +409,25 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
               fee: params.fee,
             }
           : params;
-      console.log('sendParams', sendParams);
-      const boxRef = {
+      // console.log('sendParams', sendParams);
+      const boxRefApp = {
         // : algosdk.BoxReference
         appIndex: appPoolManager,
         name: algosdk.bigIntToBytes(appId, 8),
       };
+      const boxRefUser = {
+        // : algosdk.BoxReference
+        appIndex: appPoolManager,
+        name: algosdk.decodeAddress(signer.addr).publicKey,
+      };
+      // console.log('boxRef', boxRefApp, boxRefUser, appId);
       const compose = client.compose()[req.params.method](sendParams, {
         // const compose = client.compose().bootstrap(params, {
         sender: signer,
         accounts: [],
         assets: [feeToken],
         apps: [appPoolManager],
-        boxes: [boxRef],
+        boxes: [boxRefApp, boxRefUser],
         sendParams: {
           fee: algokit.microAlgos(3000),
           maxFee: algokit.microAlgos(4000),
@@ -429,7 +436,7 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
       const atc = await compose.atc();
       res.set('content-type', 'application/json');
       const ret = atc.buildGroup().map((tx: any) => {
-        console.log('tx', tx.txn);
+        // console.log('tx', tx.txn);
         return Buffer.from(algosdk.encodeUnsignedTransaction(tx.txn)).toString('base64');
       });
       res.send(JSON.stringify(ret));
@@ -563,7 +570,7 @@ builderRouter.get(`/tx-update/:id/:env/:appId/:signer/:fileName`, async (req: Ex
     console.log('client', client);
     const atc = new AtomicTransactionComposer();
     await client.update.updateApplication(
-      { version: new Uint8Array(Buffer.from('BIATEC-CRON-01-01-01', 'utf-8')), id: req.params.id },
+      { version: 'BIATEC-CRON-01-01-01', id: req.params.id },
       {
         sender: signer,
         // updatable: true,
@@ -575,6 +582,98 @@ builderRouter.get(`/tx-update/:id/:env/:appId/:signer/:fileName`, async (req: Ex
       }
     );
 
+    res.set('content-type', 'application/json');
+    const ret = atc.buildGroup().map((tx: any) => {
+      console.log('tx', tx.txn);
+      return Buffer.from(algosdk.encodeUnsignedTransaction(tx.txn)).toString('base64');
+    });
+    res.send(JSON.stringify(ret));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    res.status(500).send(`Error occured ${e.message ?? e}`);
+    console.error(e);
+  }
+});
+builderRouter.get(`/tx-delete/:id/:env/:appId/:signer/:fileName`, async (req: ExpressRequest, res: Response) => {
+  try {
+    if (!clientFile.test(req.params.fileName)) {
+      res.status(500).send(`File not found`);
+      return;
+    }
+
+    res.set('content-type', 'application/typescript');
+    /*
+      51603c5716dd7721d303666f583d2c4aa3f5ffd9cee86708b5b405a2e9f1529d
+      AWALLETCPHQPJGCZ6AHLIFPHWBHUEHQ7VBYJVVGQRRY4MEIGWUBKCQYP4Y
+      exec
+      BiatecCronJob51603Client.ts
+      */
+    const algod = getAlgod(req.params.env);
+    const signer: TransactionSignerAccount = {
+      addr: req.params.signer,
+      // eslint-disable-next-line no-unused-vars
+      signer: async (txnGroup: Transaction[], indexesToSign: number[]) => {
+        return [new Uint8Array()];
+      },
+    };
+    const appId = parseInt(req.params.appId, 10);
+    const file = `../../data/${req.params.id}/clients/${req.params.fileName}`;
+    const clientFileImport = await import(file);
+    const clientName = req.params.fileName.replace('.ts', '');
+    const client = new clientFileImport[clientName](
+      {
+        sender: signer,
+        resolveBy: 'id',
+        id: appId,
+      },
+      algod
+    );
+    // const client = new BiatecCronJobShortHashClient(
+    //   {
+    //     sender: signer,
+    //     resolveBy: 'id',
+    //     id: appId,
+    //   },
+    //   algod
+    // );
+
+    const appPoolManager = getPoolManagerApp(req.params.env);
+    console.log('signer', signer);
+    const boxRefApp = {
+      appIndex: appPoolManager,
+      name: algosdk.bigIntToBytes(appId, 8),
+    };
+    const boxRefUser = {
+      appIndex: appPoolManager,
+      name: algosdk.decodeAddress(signer.addr).publicKey,
+    };
+    console.log('client', client);
+    const atc = new AtomicTransactionComposer();
+    await client.unregisterApplication(
+      {
+        appPoolManager,
+      },
+      {
+        sender: signer,
+        apps: [appPoolManager],
+        boxes: [boxRefApp, boxRefUser],
+        sendParams: {
+          fee: algokit.microAlgos(3000), // this call, call from app to pool app, move rest of fee token to creator
+          atc,
+        },
+      }
+    );
+    await client.delete.deleteApplication(
+      {},
+      {
+        sender: signer,
+        sendParams: {
+          fee: algokit.microAlgos(1000),
+          atc,
+        },
+      }
+    );
     res.set('content-type', 'application/json');
     const ret = atc.buildGroup().map((tx: any) => {
       console.log('tx', tx.txn);

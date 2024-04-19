@@ -133,6 +133,63 @@ deleteApplication:
 	assert
 	retsub
 
+// unregisterApplication(uint64)void
+*abi_route_unregisterApplication:
+	// appPoolManager: uint64
+	txna ApplicationArgs 1
+	btoi
+
+	// execute unregisterApplication(uint64)void
+	callsub unregisterApplication
+	int 1
+	return
+
+// unregisterApplication(appPoolManager: AppID): void
+//
+// Creator can unregisterApplication before he deletes it
+unregisterApplication:
+	proto 1 0
+
+	// contracts\template.algo.ts:72
+	// assert(this.txn.sender === globals.creatorAddress)
+	txn Sender
+	global CreatorAddress
+	==
+	assert
+
+	// contracts\template.algo.ts:74
+	// sendMethodCall<[AppID], void>({
+	//       name: 'unregisterTask',
+	//       methodArgs: [globals.currentApplicationID],
+	//       applicationID: appPoolManager,
+	//       fee: 0,
+	//     })
+	itxn_begin
+	int appl
+	itxn_field TypeEnum
+	method "unregisterTask(uint64)void"
+	itxn_field ApplicationArgs
+
+	// contracts\template.algo.ts:76
+	// methodArgs: [globals.currentApplicationID]
+	global CurrentApplicationID
+	itob
+	itxn_field ApplicationArgs
+
+	// contracts\template.algo.ts:77
+	// applicationID: appPoolManager
+	frame_dig -1 // appPoolManager: AppID
+	itxn_field ApplicationID
+
+	// contracts\template.algo.ts:78
+	// fee: 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+	retsub
+
 // setPeriod(uint64)void
 *abi_route_setPeriod:
 	// period: uint64
@@ -152,14 +209,14 @@ deleteApplication:
 setPeriod:
 	proto 1 0
 
-	// contracts\template.algo.ts:74
+	// contracts\template.algo.ts:88
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\template.algo.ts:75
+	// contracts\template.algo.ts:89
 	// this.period.value = period
 	byte 0x70 // "p"
 	frame_dig -1 // period: uint64
@@ -199,14 +256,14 @@ setPeriod:
 payment:
 	proto 3 0
 
-	// contracts\template.algo.ts:86
+	// contracts\template.algo.ts:100
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\template.algo.ts:87
+	// contracts\template.algo.ts:101
 	// sendPayment({
 	//       amount: amount,
 	//       receiver: receiver,
@@ -216,17 +273,17 @@ payment:
 	int pay
 	itxn_field TypeEnum
 
-	// contracts\template.algo.ts:88
+	// contracts\template.algo.ts:102
 	// amount: amount
 	frame_dig -1 // amount: uint64
 	itxn_field Amount
 
-	// contracts\template.algo.ts:89
+	// contracts\template.algo.ts:103
 	// receiver: receiver
 	frame_dig -2 // receiver: Address
 	itxn_field Receiver
 
-	// contracts\template.algo.ts:90
+	// contracts\template.algo.ts:104
 	// note: note
 	frame_dig -3 // note: string
 	itxn_field Note
@@ -238,7 +295,7 @@ payment:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts\template.algo.ts:92
+	// contracts\template.algo.ts:106
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
@@ -283,14 +340,14 @@ payment:
 assetTransfer:
 	proto 4 0
 
-	// contracts\template.algo.ts:103
+	// contracts\template.algo.ts:117
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\template.algo.ts:104
+	// contracts\template.algo.ts:118
 	// sendAssetTransfer({
 	//       assetAmount: assetAmount,
 	//       assetReceiver: assetReceiver,
@@ -301,22 +358,22 @@ assetTransfer:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts\template.algo.ts:105
+	// contracts\template.algo.ts:119
 	// assetAmount: assetAmount
 	frame_dig -2 // assetAmount: uint64
 	itxn_field AssetAmount
 
-	// contracts\template.algo.ts:106
+	// contracts\template.algo.ts:120
 	// assetReceiver: assetReceiver
 	frame_dig -3 // assetReceiver: Address
 	itxn_field AssetReceiver
 
-	// contracts\template.algo.ts:107
+	// contracts\template.algo.ts:121
 	// xferAsset: xferAsset
 	frame_dig -1 // xferAsset: AssetID
 	itxn_field XferAsset
 
-	// contracts\template.algo.ts:108
+	// contracts\template.algo.ts:122
 	// note: note
 	frame_dig -4 // note: string
 	itxn_field Note
@@ -383,14 +440,14 @@ bootstrap:
 	byte 0x
 	dup
 
-	// contracts\template.algo.ts:130
+	// contracts\template.algo.ts:144
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\template.algo.ts:131
+	// contracts\template.algo.ts:145
 	// verifyPayTxn(txBaseDeposit, {
 	//       receiver: this.app.address,
 	//       amount: { greaterThanEqualTo: 0 },
@@ -409,13 +466,13 @@ bootstrap:
 	>=
 	assert
 
-	// contracts\template.algo.ts:136
+	// contracts\template.algo.ts:150
 	// keep = 100000
 	int 100000
 	frame_bury 0 // keep: uint64
 
 	// *if0_condition
-	// contracts\template.algo.ts:137
+	// contracts\template.algo.ts:151
 	// globals.minBalance > keep
 	global MinBalance
 	frame_dig 0 // keep: uint64
@@ -423,13 +480,13 @@ bootstrap:
 	bz *if0_end
 
 	// *if0_consequent
-	// contracts\template.algo.ts:137
+	// contracts\template.algo.ts:151
 	// keep = globals.minBalance
 	global MinBalance
 	frame_bury 0 // keep: uint64
 
 *if0_end:
-	// contracts\template.algo.ts:141
+	// contracts\template.algo.ts:155
 	// task: Task = {
 	//       app: globals.currentApplicationID,
 	//       fee: fee,
@@ -444,7 +501,7 @@ bootstrap:
 	concat
 	frame_bury 1 // task: Task
 
-	// contracts\template.algo.ts:147
+	// contracts\template.algo.ts:161
 	// sendMethodCall<[PayTxn, Task], void>({
 	//       name: 'registerTask',
 	//       methodArgs: [
@@ -463,7 +520,7 @@ bootstrap:
 	int pay
 	itxn_field TypeEnum
 
-	// contracts\template.algo.ts:151
+	// contracts\template.algo.ts:165
 	// amount: globals.currentApplicationAddress.balance - keep
 	global CurrentApplicationAddress
 	acct_params_get AcctBalance
@@ -472,19 +529,19 @@ bootstrap:
 	-
 	itxn_field Amount
 
-	// contracts\template.algo.ts:152
+	// contracts\template.algo.ts:166
 	// note: 'reg'
 	byte 0x726567 // "reg"
 	itxn_field Note
 
-	// contracts\template.algo.ts:153
+	// contracts\template.algo.ts:167
 	// receiver: appPoolManager.address
 	frame_dig -1 // appPoolManager: AppID
 	app_params_get AppAddress
 	pop
 	itxn_field Receiver
 
-	// contracts\template.algo.ts:154
+	// contracts\template.algo.ts:168
 	// fee: 0
 	int 0
 	itxn_field Fee
@@ -494,7 +551,7 @@ bootstrap:
 	method "registerTask(pay,(uint64,uint64,uint64))void"
 	itxn_field ApplicationArgs
 
-	// contracts\template.algo.ts:149
+	// contracts\template.algo.ts:163
 	// methodArgs: [
 	//         {
 	//           amount: globals.currentApplicationAddress.balance - keep,
@@ -507,12 +564,12 @@ bootstrap:
 	frame_dig 1 // task: Task
 	itxn_field ApplicationArgs
 
-	// contracts\template.algo.ts:158
+	// contracts\template.algo.ts:172
 	// applicationID: appPoolManager
 	frame_dig -1 // appPoolManager: AppID
 	itxn_field ApplicationID
 
-	// contracts\template.algo.ts:159
+	// contracts\template.algo.ts:173
 	// fee: 0
 	int 0
 	itxn_field Fee
@@ -520,14 +577,14 @@ bootstrap:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts\template.algo.ts:162
+	// contracts\template.algo.ts:176
 	// assert(period > 0)
 	frame_dig -4 // period: uint64
 	int 0
 	>
 	assert
 
-	// contracts\template.algo.ts:163
+	// contracts\template.algo.ts:177
 	// this.id.value = id
 	byte 0x6964 // "id"
 	frame_dig -3 // id: string
@@ -539,13 +596,13 @@ bootstrap:
 	concat
 	app_global_put
 
-	// contracts\template.algo.ts:164
+	// contracts\template.algo.ts:178
 	// this.period.value = period
 	byte 0x70 // "p"
 	frame_dig -4 // period: uint64
 	app_global_put
 
-	// contracts\template.algo.ts:165
+	// contracts\template.algo.ts:179
 	// this.start.value = start
 	byte 0x73 // "s"
 	frame_dig -5 // start: uint64
@@ -589,14 +646,14 @@ bootstrap:
 sendOnlineKeyRegistration:
 	proto 6 0
 
-	// contracts\template.algo.ts:179
+	// contracts\template.algo.ts:193
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\template.algo.ts:180
+	// contracts\template.algo.ts:194
 	// sendOnlineKeyRegistration({
 	//       selectionPK: selectionPk,
 	//       stateProofPK: stateProofPk,
@@ -610,37 +667,37 @@ sendOnlineKeyRegistration:
 	int keyreg
 	itxn_field TypeEnum
 
-	// contracts\template.algo.ts:181
+	// contracts\template.algo.ts:195
 	// selectionPK: selectionPk
 	frame_dig -2 // selectionPk: bytes
 	itxn_field SelectionPK
 
-	// contracts\template.algo.ts:182
+	// contracts\template.algo.ts:196
 	// stateProofPK: stateProofPk
 	frame_dig -3 // stateProofPk: bytes
 	itxn_field StateProofPK
 
-	// contracts\template.algo.ts:183
+	// contracts\template.algo.ts:197
 	// voteFirst: voteFirst
 	frame_dig -4 // voteFirst: uint64
 	itxn_field VoteFirst
 
-	// contracts\template.algo.ts:184
+	// contracts\template.algo.ts:198
 	// voteKeyDilution: voteKeyDilution
 	frame_dig -6 // voteKeyDilution: uint64
 	itxn_field VoteKeyDilution
 
-	// contracts\template.algo.ts:185
+	// contracts\template.algo.ts:199
 	// voteLast: voteLast
 	frame_dig -5 // voteLast: uint64
 	itxn_field VoteLast
 
-	// contracts\template.algo.ts:186
+	// contracts\template.algo.ts:200
 	// votePK: votePk
 	frame_dig -1 // votePk: bytes
 	itxn_field VotePK
 
-	// contracts\template.algo.ts:187
+	// contracts\template.algo.ts:201
 	// fee: 0
 	int 0
 	itxn_field Fee
@@ -662,20 +719,20 @@ sendOnlineKeyRegistration:
 sendOfflineKeyRegistration:
 	proto 0 0
 
-	// contracts\template.algo.ts:195
+	// contracts\template.algo.ts:209
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\template.algo.ts:196
+	// contracts\template.algo.ts:210
 	// sendOfflineKeyRegistration({ fee: 0 })
 	itxn_begin
 	int keyreg
 	itxn_field TypeEnum
 
-	// contracts\template.algo.ts:196
+	// contracts\template.algo.ts:210
 	// fee: 0
 	int 0
 	itxn_field Fee
@@ -697,7 +754,7 @@ sendOfflineKeyRegistration:
 exec:
 	proto 0 0
 
-	// contracts\template.algo.ts:203
+	// contracts\template.algo.ts:217
 	// assert(this.start.value <= globals.latestTimestamp, 'ERR_NO_START_YET')
 	byte 0x73 // "s"
 	app_global_get
@@ -707,7 +764,7 @@ exec:
 	// ERR_NO_START_YET
 	assert
 
-	// contracts\template.algo.ts:204
+	// contracts\template.algo.ts:218
 	// assert(
 	//       (globals.latestTimestamp + this.start.value) / this.period.value >
 	//         (this.lastRun.value + this.start.value) / this.period.value,
@@ -733,7 +790,7 @@ exec:
 	// ERR_NO_TIME_YET
 	assert
 
-	// contracts\template.algo.ts:209
+	// contracts\template.algo.ts:223
 	// this.lastRun.value = globals.latestTimestamp
 	byte 0x6c // "l"
 	global LatestTimestamp
@@ -747,6 +804,7 @@ exec:
 	err
 
 *call_NoOp:
+	method "unregisterApplication(uint64)void"
 	method "setPeriod(uint64)void"
 	method "payment(uint64,address,string)void"
 	method "assetTransfer(uint64,uint64,address,string)void"
@@ -755,7 +813,7 @@ exec:
 	method "sendOfflineKeyRegistration()void"
 	method "exec()void"
 	txna ApplicationArgs 0
-	match *abi_route_setPeriod *abi_route_payment *abi_route_assetTransfer *abi_route_bootstrap *abi_route_sendOnlineKeyRegistration *abi_route_sendOfflineKeyRegistration *abi_route_exec
+	match *abi_route_unregisterApplication *abi_route_setPeriod *abi_route_payment *abi_route_assetTransfer *abi_route_bootstrap *abi_route_sendOnlineKeyRegistration *abi_route_sendOfflineKeyRegistration *abi_route_exec
 	err
 
 *call_UpdateApplication:

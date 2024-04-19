@@ -34,7 +34,7 @@ switch *call_NoOp *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *call_Updat
 createApplication:
 	proto 0 0
 
-	// contracts\BiatecTaskManager.algo.ts:35
+	// contracts\BiatecTaskManager.algo.ts:38
 	// this.version.value = 'BIATEC-CRON-POOL-01-01-01'
 	byte 0x7363766572 // "scver"
 	byte 0x00194249415445432d43524f4e2d504f4f4c2d30312d30312d3031
@@ -59,14 +59,14 @@ createApplication:
 updateApplication:
 	proto 1 0
 
-	// contracts\BiatecTaskManager.algo.ts:43
+	// contracts\BiatecTaskManager.algo.ts:46
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:44
+	// contracts\BiatecTaskManager.algo.ts:47
 	// this.version.value = version
 	byte 0x7363766572 // "scver"
 	frame_dig -1 // version: string
@@ -109,14 +109,14 @@ updateApplication:
 bootstrap:
 	proto 2 0
 
-	// contracts\BiatecTaskManager.algo.ts:54
+	// contracts\BiatecTaskManager.algo.ts:57
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:56
+	// contracts\BiatecTaskManager.algo.ts:59
 	// verifyPayTxn(txBaseDeposit, {
 	//       receiver: this.app.address,
 	//       amount: { greaterThanEqualTo: 0 },
@@ -135,14 +135,14 @@ bootstrap:
 	>=
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:61
+	// contracts\BiatecTaskManager.algo.ts:64
 	// this.feeAssetId.value = feeAssetId.id
 	byte 0x6661 // "fa"
 	frame_dig -2 // feeAssetId: AssetID
 	app_global_put
 
 	// *if0_condition
-	// contracts\BiatecTaskManager.algo.ts:74
+	// contracts\BiatecTaskManager.algo.ts:77
 	// this.feeAssetId.value > 0
 	byte 0x6661 // "fa"
 	app_global_get
@@ -151,7 +151,7 @@ bootstrap:
 	bz *if0_end
 
 	// *if0_consequent
-	// contracts\BiatecTaskManager.algo.ts:75
+	// contracts\BiatecTaskManager.algo.ts:78
 	// sendAssetTransfer({
 	//         assetReceiver: globals.currentApplicationAddress,
 	//         assetAmount: 0,
@@ -161,17 +161,17 @@ bootstrap:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:76
+	// contracts\BiatecTaskManager.algo.ts:79
 	// assetReceiver: globals.currentApplicationAddress
 	global CurrentApplicationAddress
 	itxn_field AssetReceiver
 
-	// contracts\BiatecTaskManager.algo.ts:77
+	// contracts\BiatecTaskManager.algo.ts:80
 	// assetAmount: 0
 	int 0
 	itxn_field AssetAmount
 
-	// contracts\BiatecTaskManager.algo.ts:78
+	// contracts\BiatecTaskManager.algo.ts:81
 	// xferAsset: AssetID.fromUint64(this.feeAssetId.value)
 	byte 0x6661 // "fa"
 	app_global_get
@@ -222,7 +222,10 @@ bootstrap:
 registerTask:
 	proto 2 0
 
-	// contracts\BiatecTaskManager.algo.ts:91
+	// Push empty bytes after the frame pointer to reserve space for local variables
+	byte 0x
+
+	// contracts\BiatecTaskManager.algo.ts:94
 	// assert(this.txn.sender === task.app.address)
 	txn Sender
 	frame_dig -2 // task: Task
@@ -233,7 +236,7 @@ registerTask:
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:92
+	// contracts\BiatecTaskManager.algo.ts:95
 	// assert(task.funds === 0)
 	frame_dig -2 // task: Task
 	extract 0 8
@@ -242,7 +245,7 @@ registerTask:
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:94
+	// contracts\BiatecTaskManager.algo.ts:97
 	// verifyPayTxn(registrationFeeDeposit, {
 	//       receiver: this.app.address,
 	//     })
@@ -253,7 +256,7 @@ registerTask:
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:97
+	// contracts\BiatecTaskManager.algo.ts:100
 	// assert(registrationFeeDeposit.amount > 500_000)
 	frame_dig -1 // registrationFeeDeposit: PayTxn
 	gtxns Amount
@@ -261,7 +264,7 @@ registerTask:
 	>
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:99
+	// contracts\BiatecTaskManager.algo.ts:102
 	// this.tasks(task.app).value = task
 	frame_dig -2 // task: Task
 	extract 8 8
@@ -269,6 +272,197 @@ registerTask:
 	itob
 	frame_dig -2 // task: Task
 	box_put
+
+	// *if1_condition
+	// contracts\BiatecTaskManager.algo.ts:103
+	// this.user2tasks(task.app.creator).exists
+	frame_dig -2 // task: Task
+	extract 8 8
+	btoi
+	app_params_get AppCreator
+	pop
+	box_len
+	swap
+	pop
+	bz *if1_else
+
+	// *if1_consequent
+	// contracts\BiatecTaskManager.algo.ts:104
+	// this.user2tasks(task.app.creator).value.push(task.app)
+	frame_dig -2 // task: Task
+	extract 8 8
+	btoi
+	app_params_get AppCreator
+	pop
+	int 2
+	int 0
+	box_extract
+	frame_dig -2 // task: Task
+	extract 8 8
+	btoi
+	itob
+	concat
+	frame_dig -2 // task: Task
+	extract 8 8
+	btoi
+	app_params_get AppCreator
+	pop
+	dup
+	box_del
+	pop
+	swap
+	dup
+	len
+	int 8
+	/
+	itob
+	extract 6 2
+	swap
+	concat
+	box_put
+	b *if1_end
+
+*if1_else:
+	// contracts\BiatecTaskManager.algo.ts:106
+	// newWhitelist: AppID[] = [task.app]
+	frame_dig -2 // task: Task
+	extract 8 8
+	btoi
+	itob
+	frame_bury 0 // newWhitelist: AppID[]
+
+	// contracts\BiatecTaskManager.algo.ts:107
+	// this.user2tasks(task.app.creator).value = newWhitelist
+	frame_dig -2 // task: Task
+	extract 8 8
+	btoi
+	app_params_get AppCreator
+	pop
+	dup
+	box_del
+	pop
+	frame_dig 0 // newWhitelist: AppID[]
+	dup
+	len
+	int 8
+	/
+	itob
+	extract 6 2
+	swap
+	concat
+	box_put
+
+*if1_end:
+	retsub
+
+// unregisterTask(uint64)void
+*abi_route_unregisterTask:
+	// app: uint64
+	txna ApplicationArgs 1
+	btoi
+
+	// execute unregisterTask(uint64)void
+	callsub unregisterTask
+	int 1
+	return
+
+// unregisterTask(app: AppID): void
+//
+// Unregister a task when task is deleted
+//
+// @param app App to unregister
+unregisterTask:
+	proto 1 0
+
+	// Push empty bytes after the frame pointer to reserve space for local variables
+	byte 0x
+
+	// contracts\BiatecTaskManager.algo.ts:117
+	// assert(this.txn.sender === app.address)
+	txn Sender
+	frame_dig -1 // app: AppID
+	app_params_get AppAddress
+	pop
+	==
+	assert
+
+	// contracts\BiatecTaskManager.algo.ts:118
+	// task = this.tasks(app).value
+	frame_dig -1 // app: AppID
+	itob
+	frame_bury 0 // storage key//task
+
+	// *if2_condition
+	// contracts\BiatecTaskManager.algo.ts:119
+	// task.funds > 0
+	int 0
+	int 8
+	frame_dig -1 // app: AppID
+	itob
+	cover 2
+	box_extract
+	btoi
+	int 0
+	>
+	bz *if2_end
+
+	// *if2_consequent
+	// contracts\BiatecTaskManager.algo.ts:120
+	// sendAssetTransfer({
+	//         assetAmount: task.funds,
+	//         assetReceiver: app.creator,
+	//         xferAsset: AssetID.fromUint64(this.feeAssetId.value),
+	//         fee: 0,
+	//       })
+	itxn_begin
+	int axfer
+	itxn_field TypeEnum
+
+	// contracts\BiatecTaskManager.algo.ts:121
+	// assetAmount: task.funds
+	int 0
+	int 8
+	frame_dig -1 // app: AppID
+	itob
+	cover 2
+	box_extract
+	btoi
+	itxn_field AssetAmount
+
+	// contracts\BiatecTaskManager.algo.ts:122
+	// assetReceiver: app.creator
+	frame_dig -1 // app: AppID
+	app_params_get AppCreator
+	pop
+	itxn_field AssetReceiver
+
+	// contracts\BiatecTaskManager.algo.ts:123
+	// xferAsset: AssetID.fromUint64(this.feeAssetId.value)
+	byte 0x6661 // "fa"
+	app_global_get
+	itxn_field XferAsset
+
+	// contracts\BiatecTaskManager.algo.ts:124
+	// fee: 0
+	int 0
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+
+*if2_end:
+	// contracts\BiatecTaskManager.algo.ts:127
+	// task.funds = 0
+	frame_dig 0 // storage key//task
+	int 0
+	byte 0x0000000000000000
+	box_replace
+
+	// contracts\BiatecTaskManager.algo.ts:128
+	// this.tasks(app).delete()
+	frame_dig -1 // app: AppID
+	itob
+	box_del
 	retsub
 
 // executeTask(appl)void
@@ -299,24 +493,24 @@ executeTask:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
 
-	// contracts\BiatecTaskManager.algo.ts:109
+	// contracts\BiatecTaskManager.algo.ts:139
 	// task = this.tasks(taskAppCall.applicationID).value
 	frame_dig -1 // taskAppCall: AppCallTxn
 	gtxns ApplicationID
 	itob
 	frame_bury 0 // storage key//task
 
-	// *if1_condition
-	// contracts\BiatecTaskManager.algo.ts:112
+	// *if3_condition
+	// contracts\BiatecTaskManager.algo.ts:142
 	// this.feeAssetId.value === 0
 	byte 0x6661 // "fa"
 	app_global_get
 	int 0
 	==
-	bz *if1_else
+	bz *if3_else
 
-	// *if1_consequent
-	// contracts\BiatecTaskManager.algo.ts:113
+	// *if3_consequent
+	// contracts\BiatecTaskManager.algo.ts:143
 	// sendPayment({
 	//         receiver: this.txn.sender,
 	//         amount: task.fee,
@@ -325,17 +519,17 @@ executeTask:
 	int pay
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:114
+	// contracts\BiatecTaskManager.algo.ts:144
 	// receiver: this.txn.sender
 	txn Sender
 	itxn_field Receiver
 
-	// contracts\BiatecTaskManager.algo.ts:115
+	// contracts\BiatecTaskManager.algo.ts:145
 	// amount: task.fee
 	int 16 // headOffset
 	int 8
 
-	// contracts\BiatecTaskManager.algo.ts:109
+	// contracts\BiatecTaskManager.algo.ts:139
 	// taskAppCall.applicationID
 	frame_dig -1 // taskAppCall: AppCallTxn
 	gtxns ApplicationID
@@ -351,10 +545,10 @@ executeTask:
 
 	// Submit inner transaction
 	itxn_submit
-	b *if1_end
+	b *if3_end
 
-*if1_else:
-	// contracts\BiatecTaskManager.algo.ts:118
+*if3_else:
+	// contracts\BiatecTaskManager.algo.ts:148
 	// sendAssetTransfer({
 	//         assetReceiver: this.txn.sender,
 	//         assetAmount: task.fee,
@@ -364,17 +558,17 @@ executeTask:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:119
+	// contracts\BiatecTaskManager.algo.ts:149
 	// assetReceiver: this.txn.sender
 	txn Sender
 	itxn_field AssetReceiver
 
-	// contracts\BiatecTaskManager.algo.ts:120
+	// contracts\BiatecTaskManager.algo.ts:150
 	// assetAmount: task.fee
 	int 16 // headOffset
 	int 8
 
-	// contracts\BiatecTaskManager.algo.ts:109
+	// contracts\BiatecTaskManager.algo.ts:139
 	// taskAppCall.applicationID
 	frame_dig -1 // taskAppCall: AppCallTxn
 	gtxns ApplicationID
@@ -384,7 +578,7 @@ executeTask:
 	btoi
 	itxn_field AssetAmount
 
-	// contracts\BiatecTaskManager.algo.ts:121
+	// contracts\BiatecTaskManager.algo.ts:151
 	// xferAsset: AssetID.fromUint64(this.feeAssetId.value)
 	byte 0x6661 // "fa"
 	app_global_get
@@ -397,14 +591,14 @@ executeTask:
 	// Submit inner transaction
 	itxn_submit
 
-*if1_end:
-	// contracts\BiatecTaskManager.algo.ts:127
+*if3_end:
+	// contracts\BiatecTaskManager.algo.ts:157
 	// task.funds -= task.fee
 	int 0
 	dup
 	int 8
 
-	// contracts\BiatecTaskManager.algo.ts:109
+	// contracts\BiatecTaskManager.algo.ts:139
 	// taskAppCall.applicationID
 	frame_dig -1 // taskAppCall: AppCallTxn
 	gtxns ApplicationID
@@ -413,12 +607,12 @@ executeTask:
 	box_extract
 	btoi
 
-	// contracts\BiatecTaskManager.algo.ts:127
+	// contracts\BiatecTaskManager.algo.ts:157
 	// task.fee
 	int 16 // headOffset
 	int 8
 
-	// contracts\BiatecTaskManager.algo.ts:109
+	// contracts\BiatecTaskManager.algo.ts:139
 	// taskAppCall.applicationID
 	frame_dig -1 // taskAppCall: AppCallTxn
 	gtxns ApplicationID
@@ -462,23 +656,23 @@ fundTask:
 	byte 0x
 	dupn 2
 
-	// contracts\BiatecTaskManager.algo.ts:137
+	// contracts\BiatecTaskManager.algo.ts:167
 	// task = this.tasks(taskAppId).value
 	frame_dig -1 // taskAppId: AppID
 	itob
 	frame_bury 0 // storage key//task
 
-	// *if2_condition
-	// contracts\BiatecTaskManager.algo.ts:139
+	// *if4_condition
+	// contracts\BiatecTaskManager.algo.ts:169
 	// this.feeAssetId.value === 0
 	byte 0x6661 // "fa"
 	app_global_get
 	int 0
 	==
-	bz *if2_else
+	bz *if4_else
 
-	// *if2_consequent
-	// contracts\BiatecTaskManager.algo.ts:140
+	// *if4_consequent
+	// contracts\BiatecTaskManager.algo.ts:170
 	// verifyPayTxn(deposit, {
 	//         receiver: this.app.address,
 	//       })
@@ -496,7 +690,7 @@ fundTask:
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:143
+	// contracts\BiatecTaskManager.algo.ts:173
 	// fee = deposit.amount / 100
 	frame_dig -2 // deposit: Txn
 	gtxns Amount
@@ -504,7 +698,7 @@ fundTask:
 	/
 	frame_bury 1 // fee: uint64
 
-	// contracts\BiatecTaskManager.algo.ts:144
+	// contracts\BiatecTaskManager.algo.ts:174
 	// task.funds += deposit.amount - fee
 	int 0
 	dup
@@ -524,7 +718,7 @@ fundTask:
 	cover 2
 	box_replace
 
-	// contracts\BiatecTaskManager.algo.ts:145
+	// contracts\BiatecTaskManager.algo.ts:175
 	// this.depositedFunds.value += deposit.amount - fee
 	byte 0x64 // "d"
 	app_global_get
@@ -536,10 +730,10 @@ fundTask:
 	byte 0x64 // "d"
 	swap
 	app_global_put
-	b *if2_end
+	b *if4_end
 
-*if2_else:
-	// contracts\BiatecTaskManager.algo.ts:147
+*if4_else:
+	// contracts\BiatecTaskManager.algo.ts:177
 	// verifyAssetTransferTxn(deposit, {
 	//         assetReceiver: this.app.address,
 	//         xferAsset: AssetID.fromUint64(this.feeAssetId.value),
@@ -566,7 +760,7 @@ fundTask:
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:151
+	// contracts\BiatecTaskManager.algo.ts:181
 	// fee = deposit.amount / 100
 	frame_dig -2 // deposit: Txn
 	gtxns Amount
@@ -574,7 +768,7 @@ fundTask:
 	/
 	frame_bury 2 // fee: uint64
 
-	// contracts\BiatecTaskManager.algo.ts:152
+	// contracts\BiatecTaskManager.algo.ts:182
 	// task.funds += deposit.assetAmount - fee
 	int 0
 	dup
@@ -594,7 +788,7 @@ fundTask:
 	cover 2
 	box_replace
 
-	// contracts\BiatecTaskManager.algo.ts:153
+	// contracts\BiatecTaskManager.algo.ts:183
 	// this.depositedFunds.value += deposit.assetAmount - fee
 	byte 0x64 // "d"
 	app_global_get
@@ -607,7 +801,7 @@ fundTask:
 	swap
 	app_global_put
 
-*if2_end:
+*if4_end:
 	retsub
 
 // unfundTask(uint64,uint64)void
@@ -638,13 +832,13 @@ unfundTask:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
 
-	// contracts\BiatecTaskManager.algo.ts:165
+	// contracts\BiatecTaskManager.algo.ts:195
 	// task = this.tasks(taskAppId).value
 	frame_dig -1 // taskAppId: AppID
 	itob
 	frame_bury 0 // storage key//task
 
-	// contracts\BiatecTaskManager.algo.ts:166
+	// contracts\BiatecTaskManager.algo.ts:196
 	// assert(this.txn.sender === task.app.creator)
 	txn Sender
 	int 8 // headOffset
@@ -659,7 +853,7 @@ unfundTask:
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:167
+	// contracts\BiatecTaskManager.algo.ts:197
 	// task.funds -= amount
 	int 0
 	dup
@@ -676,7 +870,7 @@ unfundTask:
 	cover 2
 	box_replace
 
-	// contracts\BiatecTaskManager.algo.ts:168
+	// contracts\BiatecTaskManager.algo.ts:198
 	// this.depositedFunds.value -= amount
 	byte 0x64 // "d"
 	app_global_get
@@ -686,17 +880,17 @@ unfundTask:
 	swap
 	app_global_put
 
-	// *if3_condition
-	// contracts\BiatecTaskManager.algo.ts:169
+	// *if5_condition
+	// contracts\BiatecTaskManager.algo.ts:199
 	// this.feeAssetId.value === 0
 	byte 0x6661 // "fa"
 	app_global_get
 	int 0
 	==
-	bz *if3_else
+	bz *if5_else
 
-	// *if3_consequent
-	// contracts\BiatecTaskManager.algo.ts:170
+	// *if5_consequent
+	// contracts\BiatecTaskManager.algo.ts:200
 	// sendPayment({
 	//         amount: amount,
 	//         receiver: this.txn.sender,
@@ -706,27 +900,27 @@ unfundTask:
 	int pay
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:171
+	// contracts\BiatecTaskManager.algo.ts:201
 	// amount: amount
 	frame_dig -2 // amount: uint64
 	itxn_field Amount
 
-	// contracts\BiatecTaskManager.algo.ts:172
+	// contracts\BiatecTaskManager.algo.ts:202
 	// receiver: this.txn.sender
 	txn Sender
 	itxn_field Receiver
 
-	// contracts\BiatecTaskManager.algo.ts:173
+	// contracts\BiatecTaskManager.algo.ts:203
 	// fee: 0
 	int 0
 	itxn_field Fee
 
 	// Submit inner transaction
 	itxn_submit
-	b *if3_end
+	b *if5_end
 
-*if3_else:
-	// contracts\BiatecTaskManager.algo.ts:176
+*if5_else:
+	// contracts\BiatecTaskManager.algo.ts:206
 	// sendAssetTransfer({
 	//         assetAmount: amount,
 	//         xferAsset: AssetID.fromUint64(this.feeAssetId.value),
@@ -737,23 +931,23 @@ unfundTask:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:177
+	// contracts\BiatecTaskManager.algo.ts:207
 	// assetAmount: amount
 	frame_dig -2 // amount: uint64
 	itxn_field AssetAmount
 
-	// contracts\BiatecTaskManager.algo.ts:178
+	// contracts\BiatecTaskManager.algo.ts:208
 	// xferAsset: AssetID.fromUint64(this.feeAssetId.value)
 	byte 0x6661 // "fa"
 	app_global_get
 	itxn_field XferAsset
 
-	// contracts\BiatecTaskManager.algo.ts:179
+	// contracts\BiatecTaskManager.algo.ts:209
 	// assetReceiver: this.txn.sender
 	txn Sender
 	itxn_field AssetReceiver
 
-	// contracts\BiatecTaskManager.algo.ts:180
+	// contracts\BiatecTaskManager.algo.ts:210
 	// fee: 0
 	int 0
 	itxn_field Fee
@@ -761,7 +955,7 @@ unfundTask:
 	// Submit inner transaction
 	itxn_submit
 
-*if3_end:
+*if5_end:
 	retsub
 
 // payment(address,uint64,address,string)void
@@ -806,24 +1000,24 @@ unfundTask:
 payment:
 	proto 4 0
 
-	// contracts\BiatecTaskManager.algo.ts:194
+	// contracts\BiatecTaskManager.algo.ts:224
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// *if4_condition
-	// contracts\BiatecTaskManager.algo.ts:195
+	// *if6_condition
+	// contracts\BiatecTaskManager.algo.ts:225
 	// this.feeAssetId.value === 0
 	byte 0x6661 // "fa"
 	app_global_get
 	int 0
 	==
-	bz *if4_end
+	bz *if6_end
 
-	// *if4_consequent
-	// contracts\BiatecTaskManager.algo.ts:197
+	// *if6_consequent
+	// contracts\BiatecTaskManager.algo.ts:227
 	// assert(globals.currentApplicationAddress.balance - amount >= this.depositedFunds.value)
 	global CurrentApplicationAddress
 	acct_params_get AcctBalance
@@ -835,8 +1029,8 @@ payment:
 	>=
 	assert
 
-*if4_end:
-	// contracts\BiatecTaskManager.algo.ts:199
+*if6_end:
+	// contracts\BiatecTaskManager.algo.ts:229
 	// sendPayment({
 	//       amount: amount,
 	//       receiver: receiver,
@@ -847,22 +1041,22 @@ payment:
 	int pay
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:200
+	// contracts\BiatecTaskManager.algo.ts:230
 	// amount: amount
 	frame_dig -2 // amount: uint64
 	itxn_field Amount
 
-	// contracts\BiatecTaskManager.algo.ts:201
+	// contracts\BiatecTaskManager.algo.ts:231
 	// receiver: receiver
 	frame_dig -3 // receiver: Address
 	itxn_field Receiver
 
-	// contracts\BiatecTaskManager.algo.ts:202
+	// contracts\BiatecTaskManager.algo.ts:232
 	// note: note
 	frame_dig -4 // note: string
 	itxn_field Note
 
-	// contracts\BiatecTaskManager.algo.ts:203
+	// contracts\BiatecTaskManager.algo.ts:233
 	// sender: sender
 	frame_dig -1 // sender: Address
 	itxn_field Sender
@@ -917,24 +1111,24 @@ payment:
 assetTransfer:
 	proto 5 0
 
-	// contracts\BiatecTaskManager.algo.ts:212
+	// contracts\BiatecTaskManager.algo.ts:242
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// *if5_condition
-	// contracts\BiatecTaskManager.algo.ts:213
+	// *if7_condition
+	// contracts\BiatecTaskManager.algo.ts:243
 	// this.feeAssetId.value === xferAsset.id
 	byte 0x6661 // "fa"
 	app_global_get
 	frame_dig -2 // xferAsset: AssetID
 	==
-	bz *if5_end
+	bz *if7_end
 
-	// *if5_consequent
-	// contracts\BiatecTaskManager.algo.ts:215
+	// *if7_consequent
+	// contracts\BiatecTaskManager.algo.ts:245
 	// assert(globals.currentApplicationAddress.assetBalance(xferAsset) - assetAmount >= this.depositedFunds.value)
 	global CurrentApplicationAddress
 	frame_dig -2 // xferAsset: AssetID
@@ -947,8 +1141,8 @@ assetTransfer:
 	>=
 	assert
 
-*if5_end:
-	// contracts\BiatecTaskManager.algo.ts:217
+*if7_end:
+	// contracts\BiatecTaskManager.algo.ts:247
 	// sendAssetTransfer({
 	//       assetAmount: assetAmount,
 	//       assetReceiver: assetReceiver,
@@ -960,27 +1154,27 @@ assetTransfer:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:218
+	// contracts\BiatecTaskManager.algo.ts:248
 	// assetAmount: assetAmount
 	frame_dig -3 // assetAmount: uint64
 	itxn_field AssetAmount
 
-	// contracts\BiatecTaskManager.algo.ts:219
+	// contracts\BiatecTaskManager.algo.ts:249
 	// assetReceiver: assetReceiver
 	frame_dig -4 // assetReceiver: Address
 	itxn_field AssetReceiver
 
-	// contracts\BiatecTaskManager.algo.ts:220
+	// contracts\BiatecTaskManager.algo.ts:250
 	// xferAsset: xferAsset
 	frame_dig -2 // xferAsset: AssetID
 	itxn_field XferAsset
 
-	// contracts\BiatecTaskManager.algo.ts:221
+	// contracts\BiatecTaskManager.algo.ts:251
 	// note: note
 	frame_dig -5 // note: string
 	itxn_field Note
 
-	// contracts\BiatecTaskManager.algo.ts:222
+	// contracts\BiatecTaskManager.algo.ts:252
 	// assetSender: sender
 	frame_dig -1 // sender: Address
 	itxn_field AssetSender
@@ -1030,14 +1224,14 @@ assetTransfer:
 sendOnlineKeyRegistration:
 	proto 6 0
 
-	// contracts\BiatecTaskManager.algo.ts:237
+	// contracts\BiatecTaskManager.algo.ts:267
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:238
+	// contracts\BiatecTaskManager.algo.ts:268
 	// sendOnlineKeyRegistration({
 	//       selectionPK: selectionPk,
 	//       stateProofPK: stateProofPk,
@@ -1051,37 +1245,37 @@ sendOnlineKeyRegistration:
 	int keyreg
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:239
+	// contracts\BiatecTaskManager.algo.ts:269
 	// selectionPK: selectionPk
 	frame_dig -2 // selectionPk: bytes
 	itxn_field SelectionPK
 
-	// contracts\BiatecTaskManager.algo.ts:240
+	// contracts\BiatecTaskManager.algo.ts:270
 	// stateProofPK: stateProofPk
 	frame_dig -3 // stateProofPk: bytes
 	itxn_field StateProofPK
 
-	// contracts\BiatecTaskManager.algo.ts:241
+	// contracts\BiatecTaskManager.algo.ts:271
 	// voteFirst: voteFirst
 	frame_dig -4 // voteFirst: uint64
 	itxn_field VoteFirst
 
-	// contracts\BiatecTaskManager.algo.ts:242
+	// contracts\BiatecTaskManager.algo.ts:272
 	// voteKeyDilution: voteKeyDilution
 	frame_dig -6 // voteKeyDilution: uint64
 	itxn_field VoteKeyDilution
 
-	// contracts\BiatecTaskManager.algo.ts:243
+	// contracts\BiatecTaskManager.algo.ts:273
 	// voteLast: voteLast
 	frame_dig -5 // voteLast: uint64
 	itxn_field VoteLast
 
-	// contracts\BiatecTaskManager.algo.ts:244
+	// contracts\BiatecTaskManager.algo.ts:274
 	// votePK: votePk
 	frame_dig -1 // votePk: bytes
 	itxn_field VotePK
 
-	// contracts\BiatecTaskManager.algo.ts:245
+	// contracts\BiatecTaskManager.algo.ts:275
 	// fee: 0
 	int 0
 	itxn_field Fee
@@ -1103,20 +1297,20 @@ sendOnlineKeyRegistration:
 sendOfflineKeyRegistration:
 	proto 0 0
 
-	// contracts\BiatecTaskManager.algo.ts:253
+	// contracts\BiatecTaskManager.algo.ts:283
 	// assert(this.txn.sender === globals.creatorAddress)
 	txn Sender
 	global CreatorAddress
 	==
 	assert
 
-	// contracts\BiatecTaskManager.algo.ts:254
+	// contracts\BiatecTaskManager.algo.ts:284
 	// sendOfflineKeyRegistration({ fee: 0 })
 	itxn_begin
 	int keyreg
 	itxn_field TypeEnum
 
-	// contracts\BiatecTaskManager.algo.ts:254
+	// contracts\BiatecTaskManager.algo.ts:284
 	// fee: 0
 	int 0
 	itxn_field Fee
@@ -1134,6 +1328,7 @@ sendOfflineKeyRegistration:
 *call_NoOp:
 	method "bootstrap(pay,uint64)void"
 	method "registerTask(pay,(uint64,uint64,uint64))void"
+	method "unregisterTask(uint64)void"
 	method "executeTask(appl)void"
 	method "fundTask(uint64,txn)void"
 	method "unfundTask(uint64,uint64)void"
@@ -1142,7 +1337,7 @@ sendOfflineKeyRegistration:
 	method "sendOnlineKeyRegistration(byte[],byte[],byte[],uint64,uint64,uint64)void"
 	method "sendOfflineKeyRegistration()void"
 	txna ApplicationArgs 0
-	match *abi_route_bootstrap *abi_route_registerTask *abi_route_executeTask *abi_route_fundTask *abi_route_unfundTask *abi_route_payment *abi_route_assetTransfer *abi_route_sendOnlineKeyRegistration *abi_route_sendOfflineKeyRegistration
+	match *abi_route_bootstrap *abi_route_registerTask *abi_route_unregisterTask *abi_route_executeTask *abi_route_fundTask *abi_route_unfundTask *abi_route_payment *abi_route_assetTransfer *abi_route_sendOnlineKeyRegistration *abi_route_sendOfflineKeyRegistration
 	err
 
 *call_UpdateApplication:

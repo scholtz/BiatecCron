@@ -66,6 +66,20 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   }
 
   /**
+   * Creator can unregisterApplication before he deletes it
+   */
+  unregisterApplication(appPoolManager: AppID): void {
+    assert(this.txn.sender === globals.creatorAddress);
+
+    sendMethodCall<[AppID], void>({
+      name: 'unregisterTask',
+      methodArgs: [globals.currentApplicationID],
+      applicationID: appPoolManager,
+      fee: 0,
+    });
+  }
+
+  /**
    * Creator can change the period how ofter the script can be executed by executors
    *
    * @param period Period in seconds

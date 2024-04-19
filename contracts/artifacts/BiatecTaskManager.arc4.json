@@ -63,6 +63,20 @@
       }
     },
     {
+      "name": "unregisterTask",
+      "desc": "Unregister a task when task is deleted",
+      "args": [
+        {
+          "name": "app",
+          "type": "uint64",
+          "desc": "App to unregister"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "executeTask",
       "desc": "Execute a task and get the reward",
       "args": [

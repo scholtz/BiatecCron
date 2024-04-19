@@ -36,6 +36,19 @@
       }
     },
     {
+      "name": "unregisterApplication",
+      "desc": "Creator can unregisterApplication before he deletes it",
+      "args": [
+        {
+          "name": "appPoolManager",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "setPeriod",
       "desc": "Creator can change the period how ofter the script can be executed by executors",
       "args": [
