@@ -1,25 +1,23 @@
-# TEALScript Project
+# Biatec Cron Builder - Decentralized Scheduler
 
-## Documentation
+This is the backend and executor repo for the decentralized algorand scheduler.
 
-For TEALScript documentation, go to https://tealscript.algo.xyz
+Decentralized scheduler consists of the frontend blockly code builder where anyone can build their own logic. Person selects the start time and period how often the tasks should execute and execution fee in tokenized gold. User deposits funds to the escrow account. Anyone can execute the tasks from the escrow account when the times comes. Each execution event is logged in the escrow account transactions.
 
-## Usage
+More detailed documentation: https://docs-scheduler.biatec.io/
 
-### Algokit
+## Executor competition
 
-This template assumes you have a local network running on your machine. The easiet way to setup a local network is with [algokit](https://github.com/algorandfoundation/algokit-cli). If you don't have Algokit or its dependencies installed locally you can open this repository in a GitHub codespace via https://codespaces.new and choosing this repo.
+Anyone can execute the tasks. Successful executor will receive reward set in the smart contract. 
 
-### Build Contract
+## XGov grant
 
-`npm run build` will compile the contract to TEAL and generate an ABI and appspec JSON in [./contracts/artifacts](./contracts/artifacts/) and a algokit TypeScript client in [./contracts/clients](./contracts/clients/).
+This work has been performed with support from the Algorand Foundation xGov Grants Program - [xGov#90](https://github.com/algorandfoundation/xGov/blob/main/Proposals/xgov-90.md).
 
-`npm run compile-contract` or `npm run generate-client` can be used to compile the contract or generate the contract seperately.
+- Source code of the frontend smart contract blockly builder - https://github.com/scholtz/BiatecCronBuilder
+- Source code of the backend yaml 2 tealscript builder - https://github.com/scholtz/BiatecCron
 
-### Run Tests
+## Deployment
 
-`npm run test` will execute the tests defined in [./\_\_test\_\_](./__test__) 
-
-### Lint
-
-`npm run lint` will lint the contracts and tests with ESLint.
+- FE: https://scheduler.biatec.io
+- API: https://api-scheduler.biatec.io
