@@ -126,7 +126,16 @@ export class BiatecTaskManager extends Contract {
     }
     task.funds = 0;
     this.tasks(app).delete();
-    // const index = this.user2tasks(app.creator).value.indexOf(app)
+    // const foundIndex = 9999999;
+    // // eslint-disable-next-line no-restricted-syntax, guard-for-in
+    // for (const index in this.user2tasks(app.creator).value) {
+    //   const appFromBox = this.user2tasks(app.creator).value.at(index);
+    //   if (appFromBox === app) {
+    //     foundIndex = index;
+    //     break;
+    //   }
+    // }
+    // this.user2tasks(app.creator).value.splice(foundIndex, 1);
   }
 
   /**
