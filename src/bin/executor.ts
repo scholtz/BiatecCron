@@ -49,6 +49,7 @@ const app = async () => {
           await setTimeout(fairUsageTimeout); // fair usage policy to algod node
           const data = parseBoxData(boxData.value);
           if (data.fee < 1000) continue;
+          if (data.funds < data.fee) continue;
 
           const appInfo = await algod.getApplicationByID(data.app).do();
           // console.log('appInfo', appInfo.params['global-state']);

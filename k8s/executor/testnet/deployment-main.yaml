@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: biatec
+---
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: biatec-cron-executor-1-deployment
+  namespace: biatec
+spec:
+  selector:
+    matchLabels:
+      app: biatec-cron-executor-1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: biatec-cron-executor-1
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+      - name: regcred
+      containers:
+        - name: biatec-cron-executor-1
+          image: scholtz2/biatec-cron-executor:1.2024.04.19-main
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: '500Mi'
+              cpu: '100m'
+            limits:
+              memory: '1000Mi'
+              cpu: '2000m'
+          ports: 
+            - containerPort: 8080
+              protocol: TCP
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+          env:
+          - name: env
+            value: testnet-v1.0
+          - name: taskManagerAppId
+            value: 643872805
+          - name: signer
+            valueFrom:
+              secretKeyRef:
+                name: executors
+                key: exec1
