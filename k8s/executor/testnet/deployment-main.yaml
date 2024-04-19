@@ -45,7 +45,17 @@ spec:
           - name: env
             value: testnet-v1.0
           - name: taskManagerAppId
-            value: 643872805
+            value: "643872805"
+          - name: algodTimeout
+            value: "1000"
+          - name: delayBetweenRetries
+            value: "20000"
+          - name: randomDelayBetweenRetries
+            value: "10000"
+          - name: maxTxs
+            value: "20"
+          - name: minFee
+            value: "1000"
           - name: signer
             valueFrom:
               secretKeyRef:

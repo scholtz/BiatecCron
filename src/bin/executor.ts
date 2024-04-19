@@ -19,7 +19,11 @@ import simulateAndCountTxs from '../scripts/algo/simulateAndCountTxs';
  */
 const app = async () => {
   //  algokit.Config.configure({ populateAppCallResources: true });
-  const fairUsageTimeout = 500;
+  const fairUsageTimeout = parseInt(process.env.algodTimeout ?? '500', 10);
+  const delayBetweenRetries = parseInt(process.env.delayBetweenRetries ?? '20000', 10);
+  const randomDelayBetweenRetries = parseInt(process.env.randomDelayBetweenRetries ?? '10000', 10);
+  const minFee = parseInt(process.env.minFee ?? '1000', 10);
+  const maxTxs = parseInt(process.env.maxTxs ?? '20', 10);
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
@@ -48,7 +52,7 @@ const app = async () => {
           const boxData = await algod.getApplicationBoxByName(appPoolId, boxName.name).do();
           await setTimeout(fairUsageTimeout); // fair usage policy to algod node
           const data = parseBoxData(boxData.value);
-          if (data.fee < 1000) continue;
+          if (data.fee < minFee) continue;
           if (data.funds < data.fee) continue;
 
           const appInfo = await algod.getApplicationByID(data.app).do();
@@ -65,6 +69,7 @@ const app = async () => {
           console.log(data);
         } catch (e: any) {
           console.error(e.message);
+          await setTimeout(fairUsageTimeout); // fair usage policy to algod node
         }
       }
 
@@ -82,6 +87,7 @@ const app = async () => {
       // eslint-disable-next-line no-restricted-syntax
       for (const run of Object.values(toExec)) {
         try {
+          await setTimeout(fairUsageTimeout); // fair usage policy to algod node
           const client = new BiatecCronJobShortHashClient(
             {
               id: run.app,
@@ -124,6 +130,7 @@ const app = async () => {
               ],
             })
           );
+          await setTimeout(fairUsageTimeout); // fair usage policy to algod node
           // console.log('simulate', JSON.stringify(simulate));
 
           // console.log('simulate', simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed);
@@ -158,6 +165,9 @@ const app = async () => {
           const txs = atc2.buildGroup().map((tx) => tx.txn);
 
           const txCount = await simulateAndCountTxs(txs, algod, signerAccount);
+          if (!txCount) throw Error('No fee detected');
+          if (txCount > maxTxs) throw Error('Too many txs detected');
+          await setTimeout(fairUsageTimeout); // fair usage policy to algod node
           const fee = 1000 * (txCount + 2);
           console.log(`fee: ${fee}`);
           // if (2 > 1) {
@@ -199,13 +209,15 @@ const app = async () => {
           console.log('execute successfull');
         } catch (e) {
           console.error(`Error while executing app ${run.app}`, e);
+          await setTimeout(fairUsageTimeout); // fair usage policy to algod node
         }
       }
     } catch (e) {
       console.error('fatal: ', e);
     }
-    console.log(new Date());
-    await setTimeout(20000 + Math.round(Math.random() * 10000));
+    const wait = delayBetweenRetries + Math.round(Math.random() * randomDelayBetweenRetries);
+    console.log(`${new Date()} ${wait}`);
+    await setTimeout(wait);
   }
 };
 
