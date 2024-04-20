@@ -12,6 +12,7 @@ import type {
   AppCompilationResult,
   AppReference,
   AppState,
+  AppStorageSchema,
   CoreAppCallArgs,
   RawAppCallArgs,
   TealTemplateParams,
@@ -174,6 +175,13 @@ export type AppClientComposeCallCoreParams = Omit<AppClientCallCoreParams, 'send
 }
 export type AppClientComposeExecuteParams = Pick<SendTransactionParams, 'skipWaiting' | 'maxRoundsToWaitForConfirmation' | 'populateAppCallResources' | 'suppressLog'>
 
+export type IncludeSchema = {
+  /**
+   * Any overrides for the storage schema to request for the created app; by default the schema indicated by the app spec is used.
+   */
+  schema?: Partial<AppStorageSchema>
+}
+
 /**
  * Defines the types of available calls and state of the BiatecCronJobs smart contract.
  */
@@ -207,9 +215,9 @@ export type BiatecCronJobs = {
    */
   state: {
     global: {
-      'l'?: IntegerState
-      'p'?: IntegerState
-      'o'?: IntegerState
+      l?: IntegerState
+      p?: IntegerState
+      o?: IntegerState
     }
   }
 }
@@ -361,7 +369,7 @@ export class BiatecCronJobsClient {
    * @param params The arguments for the contract calls and any additional parameters for the call
    * @returns The deployment result
    */
-  public deploy(params: BiatecCronJobsDeployArgs & AppClientDeployCoreParams = {}): ReturnType<ApplicationClient['deploy']> {
+  public deploy(params: BiatecCronJobsDeployArgs & AppClientDeployCoreParams & IncludeSchema = {}): ReturnType<ApplicationClient['deploy']> {
     const createArgs = params.createCall?.(BiatecCronJobsCallFactory.create)
     return this.appClient.deploy({
       ...params,
@@ -383,7 +391,7 @@ export class BiatecCronJobsClient {
        * @param params Any additional parameters for the call
        * @returns The create result
        */
-      async createApplication(args: MethodArgs<'createApplication(uint64,uint64)void'>, params: AppClientCallCoreParams & AppClientCompilationParams & (OnCompleteNoOp) = {}) {
+      async createApplication(args: MethodArgs<'createApplication(uint64,uint64)void'>, params: AppClientCallCoreParams & AppClientCompilationParams & IncludeSchema & (OnCompleteNoOp) = {}) {
         return $this.mapReturnValue<MethodReturn<'createApplication(uint64,uint64)void'>, AppCreateCallTransactionResult>(await $this.appClient.create(BiatecCronJobsCallFactory.create.createApplication(args, params)))
       },
     }

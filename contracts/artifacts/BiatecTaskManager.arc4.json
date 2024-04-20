@@ -70,6 +70,11 @@
           "name": "app",
           "type": "uint64",
           "desc": "App to unregister"
+        },
+        {
+          "name": "indexToDelete",
+          "type": "uint64",
+          "desc": "App index to delete from user's apps"
         }
       ],
       "returns": {

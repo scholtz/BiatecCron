@@ -10,11 +10,11 @@ export type Task = {
 };
 
 export class BiatecTaskManager extends Contract {
-  /** All of the available tasks */
-  tasks = BoxMap<AppID, Task>();
+  /** All of the available tasks. Preffix: t (tasks) */
+  tasks = BoxMap<AppID, Task>({ prefix: 't' });
 
-  /** All of the available tasks */
-  user2tasks = BoxMap<Address, AppID[]>();
+  /** All of users tasks. Preffix: u (users tasks) */
+  user2tasks = BoxMap<Address, AppID[]>({ prefix: 'u' });
 
   /**
    * Fee token - asset id, 0 for native token
@@ -112,8 +112,9 @@ export class BiatecTaskManager extends Contract {
    * Unregister a task when task is deleted
    *
    * @param app App to unregister
+   * @param indexToDelete App index to delete from user's apps
    */
-  unregisterTask(app: AppID): void {
+  unregisterTask(app: AppID, indexToDelete: uint64): void {
     assert(this.txn.sender === app.address); // only the app itself can unregister
     const task = this.tasks(app).value;
     if (task.funds > 0) {
@@ -126,16 +127,11 @@ export class BiatecTaskManager extends Contract {
     }
     task.funds = 0;
     this.tasks(app).delete();
-    // const foundIndex = 9999999;
-    // // eslint-disable-next-line no-restricted-syntax, guard-for-in
-    // for (const index in this.user2tasks(app.creator).value) {
-    //   const appFromBox = this.user2tasks(app.creator).value.at(index);
-    //   if (appFromBox === app) {
-    //     foundIndex = index;
-    //     break;
-    //   }
-    // }
-    // this.user2tasks(app.creator).value.splice(foundIndex, 1);
+
+    // const toDelete = this.user2tasks(app.creator).value.at(indexToDelete);
+    // assert(toDelete === app);
+
+    this.user2tasks(app.creator).value.splice(indexToDelete, 1);
   }
 
   /**

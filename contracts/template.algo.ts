@@ -35,6 +35,11 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   start = GlobalStateKey<uint64>({ key: 's' });
 
   /**
+   * Pool manager application
+   */
+  appPoolManager = GlobalStateKey<AppID>({ key: 'pool' });
+
+  /**
    * Version of the smart contract
    */
   version = GlobalStateKey<string>({ key: 'scver' });
@@ -67,13 +72,16 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
 
   /**
    * Creator can unregisterApplication before he deletes it
+   *
+   * @param appPoolManager Pool manager where the task is registered
+   * @param indexToDelete App index to delete from user's apps
    */
-  unregisterApplication(appPoolManager: AppID): void {
+  unregisterApplication(appPoolManager: AppID, indexToDelete: uint64): void {
     assert(this.txn.sender === globals.creatorAddress);
-
-    sendMethodCall<[AppID], void>({
+    assert(this.appPoolManager.value === appPoolManager);
+    sendMethodCall<[AppID, uint64], void>({
       name: 'unregisterTask',
-      methodArgs: [globals.currentApplicationID],
+      methodArgs: [globals.currentApplicationID, indexToDelete],
       applicationID: appPoolManager,
       fee: 0,
     });
@@ -177,6 +185,7 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
     this.id.value = id;
     this.period.value = period;
     this.start.value = start;
+    this.appPoolManager.value = appPoolManager;
   }
 
   /**

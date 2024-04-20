@@ -13,6 +13,7 @@ import { ITaskBox } from '../interface/ITaskBox';
 import { BiatecTaskManagerClient } from '../../contracts/clients/BiatecTaskManagerClient';
 import { BiatecCronJobShortHashClient } from '../../contracts/clients/BiatecCronJob__SHORT_HASH__Client';
 import simulateAndCountTxs from '../scripts/algo/simulateAndCountTxs';
+import getBoxReferenceApp from '../scripts/scheduler/getBoxReferenceApp';
 
 /**
  * Executor is the runnable app which executes all scheduler tasks
@@ -139,10 +140,7 @@ const app = async () => {
           assetsSim.forEach((a) => assets.push(a));
           const boxes =
             simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed?.boxes?.map((a) => a as any) ?? [];
-          boxes.push({
-            appIndex: appPoolId,
-            name: algosdk.bigIntToBytes(run.app, 8),
-          });
+          boxes.push(getBoxReferenceApp(appPoolId, run.app));
           const apps =
             simulate.simulateResponse.txnGroups[0].unnamedResourcesAccessed?.apps?.map((a) => Number(a)) ?? [];
           apps.push(appPoolId);

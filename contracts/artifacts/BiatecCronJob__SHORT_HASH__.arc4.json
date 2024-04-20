@@ -41,7 +41,13 @@
       "args": [
         {
           "name": "appPoolManager",
-          "type": "uint64"
+          "type": "uint64",
+          "desc": "Pool manager where the task is registered"
+        },
+        {
+          "name": "indexToDelete",
+          "type": "uint64",
+          "desc": "App index to delete from user's apps"
         }
       ],
       "returns": {

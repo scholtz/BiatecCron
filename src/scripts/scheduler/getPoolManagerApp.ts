@@ -8,7 +8,7 @@ const getPoolManagerApp = (env: string) => {
       return 0;
     case 'sandnet-v1':
     default:
-      return 1033;
+      return 1114;
   }
 };
 export default getPoolManagerApp;

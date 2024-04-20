@@ -16,6 +16,9 @@ import sha256 from '../scripts/crypto/sha256';
 import IBuildContent from '../interface/IBuildContent';
 import getAlgod from '../scripts/algo/getAlgod';
 import getPoolManagerApp from '../scripts/scheduler/getPoolManagerApp';
+import getBoxReferenceApp from '../scripts/scheduler/getBoxReferenceApp';
+import getBoxReferenceUser from '../scripts/scheduler/getBoxReferenceUser';
+import { BiatecCronJobShortHashClient } from '../../contracts/clients/BiatecCronJob__SHORT_HASH__Client';
 // import { BiatecCronJobShortHashClient } from '../../contracts/clients/BiatecCronJob__SHORT_HASH__Client';
 
 export const builderRouter = Router();
@@ -410,16 +413,9 @@ builderRouter.post(`/tx/:id/:env/:signer/:appId/:method/:fileName`, async (req: 
             }
           : params;
       // console.log('sendParams', sendParams);
-      const boxRefApp = {
-        // : algosdk.BoxReference
-        appIndex: appPoolManager,
-        name: algosdk.bigIntToBytes(appId, 8),
-      };
-      const boxRefUser = {
-        // : algosdk.BoxReference
-        appIndex: appPoolManager,
-        name: algosdk.decodeAddress(signer.addr).publicKey,
-      };
+      const boxRefApp = getBoxReferenceApp(appPoolManager, appId);
+      const boxRefUser = getBoxReferenceUser(appPoolManager, algosdk.decodeAddress(signer.addr));
+      console.log('boxes', [boxRefApp, boxRefUser]);
       // console.log('boxRef', boxRefApp, boxRefUser, appId);
       const compose = client.compose()[req.params.method](sendParams, {
         // const compose = client.compose().bootstrap(params, {
@@ -494,7 +490,7 @@ builderRouter.get(`/tx-create/:id/:env/:signer/:fileName`, async (req: ExpressRe
     //   },
     //   algod
     // );
-    console.log('client', client);
+    // console.log('client', client);
     const atc = new AtomicTransactionComposer();
     await client.create.createApplication(
       {},
@@ -565,9 +561,9 @@ builderRouter.get(`/tx-update/:id/:env/:appId/:signer/:fileName`, async (req: Ex
     //   algod
     // );
 
-    console.log('signer', signer);
+    // console.log('signer', signer);
 
-    console.log('client', client);
+    // console.log('client', client);
     const atc = new AtomicTransactionComposer();
     await client.update.updateApplication(
       { version: 'BIATEC-CRON-01-01-01', id: req.params.id },
@@ -618,18 +614,10 @@ builderRouter.get(`/tx-delete/:id/:env/:appId/:signer/:fileName`, async (req: Ex
       },
     };
     const appId = parseInt(req.params.appId, 10);
-    const file = `../../data/${req.params.id}/clients/${req.params.fileName}`;
-    const clientFileImport = await import(file);
-    const clientName = req.params.fileName.replace('.ts', '');
-    const client = new clientFileImport[clientName](
-      {
-        sender: signer,
-        resolveBy: 'id',
-        id: appId,
-      },
-      algod
-    );
-    // const client = new BiatecCronJobShortHashClient(
+    // const file = `../../data/${req.params.id}/clients/${req.params.fileName}`;
+    // const clientFileImport = await import(file);
+    // const clientName = req.params.fileName.replace('.ts', '');
+    // const client = new clientFileImport[clientName](
     //   {
     //     sender: signer,
     //     resolveBy: 'id',
@@ -637,22 +625,45 @@ builderRouter.get(`/tx-delete/:id/:env/:appId/:signer/:fileName`, async (req: Ex
     //   },
     //   algod
     // );
-
+    const client = new BiatecCronJobShortHashClient(
+      {
+        sender: signer,
+        resolveBy: 'id',
+        id: appId,
+      },
+      algod
+    );
+    const signerAddress = algosdk.decodeAddress(req.params.signer);
     const appPoolManager = getPoolManagerApp(req.params.env);
+    const box = await algod
+      .getApplicationBoxByName(appPoolManager, getBoxReferenceUser(appPoolManager, signerAddress).name)
+      .do();
+    let found = false;
+    let index = 0;
+    const appIdBigint = BigInt(appId);
+    while (!found && index * 8 + 2 < box.value.length) {
+      const start = index * 8 + 2;
+      const value = box.value.subarray(start, start + 8);
+      console.log(Buffer.from(value).toString('hex'), start);
+      const intvalue = algosdk.bytesToBigInt(value);
+      if (intvalue === appIdBigint) {
+        found = true;
+        break;
+      }
+      index += 1;
+    }
+    if (!found) throw Error('App id not found in the list of registered user tasks');
+    const indexToDelete = index;
+    console.log('indexToDelete', indexToDelete);
     console.log('signer', signer);
-    const boxRefApp = {
-      appIndex: appPoolManager,
-      name: algosdk.bigIntToBytes(appId, 8),
-    };
-    const boxRefUser = {
-      appIndex: appPoolManager,
-      name: algosdk.decodeAddress(signer.addr).publicKey,
-    };
-    console.log('client', client);
+    const boxRefApp = getBoxReferenceApp(appPoolManager, appId);
+    const boxRefUser = getBoxReferenceUser(appPoolManager, algosdk.decodeAddress(signer.addr));
+    // console.log('client', client);
     const atc = new AtomicTransactionComposer();
     await client.unregisterApplication(
       {
         appPoolManager,
+        indexToDelete,
       },
       {
         sender: signer,
@@ -676,7 +687,7 @@ builderRouter.get(`/tx-delete/:id/:env/:appId/:signer/:fileName`, async (req: Ex
     );
     res.set('content-type', 'application/json');
     const ret = atc.buildGroup().map((tx: any) => {
-      console.log('tx', tx.txn);
+      // console.log('tx', tx.txn);
       return Buffer.from(algosdk.encodeUnsignedTransaction(tx.txn)).toString('base64');
     });
     res.send(JSON.stringify(ret));
