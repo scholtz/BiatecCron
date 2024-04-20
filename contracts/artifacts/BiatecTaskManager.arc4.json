@@ -110,6 +110,25 @@
       }
     },
     {
+      "name": "changeTaskFee",
+      "desc": "Creator of the task is allowed to change the fee",
+      "args": [
+        {
+          "name": "taskAppId",
+          "type": "uint64",
+          "desc": "The ID of the task to fund"
+        },
+        {
+          "name": "fee",
+          "type": "uint64",
+          "desc": "Fee in base units of the fee token"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "unfundTask",
       "desc": "Remove funds for a taskCreator of the underlying task can remove the funds from the pool",
       "args": [

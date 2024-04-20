@@ -194,6 +194,18 @@ export class BiatecTaskManager extends Contract {
   }
 
   /**
+   * Creator of the task is allowed to change the fee
+   *
+   * @param taskAppId The ID of the task to fund
+   * @param fee Fee in base units of the fee token
+   */
+  changeTaskFee(taskAppId: AppID, fee: uint64): void {
+    const task = this.tasks(taskAppId).value;
+    assert(this.txn.sender === task.app.creator);
+    task.fee = fee;
+  }
+
+  /**
    * Remove funds for a task
    * Creator of the underlying task can remove the funds from the pool
    *
