@@ -42,13 +42,15 @@ const app = async () => {
       const env = process.env.env ?? 'localhost';
       const algod = getAlgod(env);
       const appPoolId = getPoolManagerApp(env);
-      const boexes = await algod.getApplicationBoxes(appPoolId).do();
+      const appBoxes = await algod.getApplicationBoxes(appPoolId).do();
+      // console.log('appBoxes', appBoxes);
       await setTimeout(fairUsageTimeout); // fair usage policy to algod node
 
       const toExec: { [key: string]: ITaskBox } = {};
 
       // eslint-disable-next-line no-restricted-syntax
-      for (const boxName of boexes.boxes) {
+      for (const boxName of appBoxes.boxes) {
+        if (Buffer.from(boxName.name.subarray(0, 1)).toString('ascii') !== 't') continue;
         try {
           const boxData = await algod.getApplicationBoxByName(appPoolId, boxName.name).do();
           await setTimeout(fairUsageTimeout); // fair usage policy to algod node

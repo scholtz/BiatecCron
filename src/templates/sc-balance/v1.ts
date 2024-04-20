@@ -16,7 +16,7 @@ const scBalanceV1 = (input: IInput, buildContent: IBuildContent) => {
   // eslint-disable-next-line no-param-reassign
   buildContent.variables[input.inputs.var] = input.inputs.var;
   if (isNumeric(input.inputs.token)) {
-    if (input.inputs.token) {
+    if (Number(input.inputs.token) > 0) {
       return `
       // scBalanceV1
       ${defineVar}${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64(${input.inputs.token}));`;
