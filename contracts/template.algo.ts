@@ -220,6 +220,13 @@ class BiatecCronJob__SHORT_HASH__ extends Contract {
   }
 
   /**
+   * No op, for purpose of adding extra resources to the tx group
+   */
+  noop(): void {
+    assert(this.txn.sender === globals.creatorAddress);
+  }
+
+  /**
    * Anyone can execute this scheduler method when time is right and he will be rewarded the fee
    */
   exec(): void {
