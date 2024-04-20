@@ -202,6 +202,14 @@
       }
     },
     {
+      "name": "noop",
+      "desc": "No op, for purpose of adding extra resources to the tx group",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
       "name": "exec",
       "desc": "Anyone can execute this scheduler method when time is right and he will be rewarded the fee",
       "args": [],

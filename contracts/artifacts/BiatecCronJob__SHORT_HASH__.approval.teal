@@ -765,6 +765,25 @@ sendOfflineKeyRegistration:
 	itxn_submit
 	retsub
 
+// noop()void
+*abi_route_noop:
+	// execute noop()void
+	callsub noop
+	int 1
+	return
+
+// noop(): void
+//
+// No op, for purpose of adding extra resources to the tx group
+noop:
+	proto 0 0
+
+	// contracts\template.algo.ts:226
+	// log('1')
+	byte 0x31 // "1"
+	log
+	retsub
+
 // exec()void
 *abi_route_exec:
 	// execute exec()void
@@ -778,7 +797,7 @@ sendOfflineKeyRegistration:
 exec:
 	proto 0 0
 
-	// contracts\template.algo.ts:226
+	// contracts\template.algo.ts:233
 	// assert(this.start.value <= globals.latestTimestamp, 'ERR_NO_START_YET')
 	byte 0x73 // "s"
 	app_global_get
@@ -788,7 +807,7 @@ exec:
 	// ERR_NO_START_YET
 	assert
 
-	// contracts\template.algo.ts:227
+	// contracts\template.algo.ts:234
 	// assert(
 	//       (globals.latestTimestamp + this.start.value) / this.period.value >
 	//         (this.lastRun.value + this.start.value) / this.period.value,
@@ -814,7 +833,7 @@ exec:
 	// ERR_NO_TIME_YET
 	assert
 
-	// contracts\template.algo.ts:232
+	// contracts\template.algo.ts:239
 	// this.lastRun.value = globals.latestTimestamp
 	byte 0x6c // "l"
 	global LatestTimestamp
@@ -835,9 +854,10 @@ exec:
 	method "bootstrap(uint64,pay,string,uint64,uint64,uint64)void"
 	method "sendOnlineKeyRegistration(byte[],byte[],byte[],uint64,uint64,uint64)void"
 	method "sendOfflineKeyRegistration()void"
+	method "noop()void"
 	method "exec()void"
 	txna ApplicationArgs 0
-	match *abi_route_unregisterApplication *abi_route_setPeriod *abi_route_payment *abi_route_assetTransfer *abi_route_bootstrap *abi_route_sendOnlineKeyRegistration *abi_route_sendOfflineKeyRegistration *abi_route_exec
+	match *abi_route_unregisterApplication *abi_route_setPeriod *abi_route_payment *abi_route_assetTransfer *abi_route_bootstrap *abi_route_sendOnlineKeyRegistration *abi_route_sendOfflineKeyRegistration *abi_route_noop *abi_route_exec
 	err
 
 *call_UpdateApplication:
