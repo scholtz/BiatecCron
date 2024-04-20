@@ -8,14 +8,22 @@ interface IInput {
     token: string | undefined;
   };
 }
+function isNumeric(value: any) {
+  return /^-?\d+$/.test(value);
+}
 const scBalanceV1 = (input: IInput, buildContent: IBuildContent) => {
   const defineVar = buildContent?.variables[input.inputs.var] === undefined ? 'let ' : '';
   // eslint-disable-next-line no-param-reassign
   buildContent.variables[input.inputs.var] = input.inputs.var;
-  if (input.inputs.token === '0') {
+  if (isNumeric(input.inputs.token)) {
+    if (input.inputs.token) {
+      return `
+      // scBalanceV1
+      ${defineVar}${input.inputs.var} = globals.currentApplicationAddress.assetBalance(AssetID.fromUint64(${input.inputs.token}));`;
+    }
     return `
-    // scBalanceV1
-    ${defineVar}${input.inputs.var} = globals.currentApplicationAddress.balance;`;
+      // scBalanceV1
+      ${defineVar}${input.inputs.var} = globals.currentApplicationAddress.balance;`;
   }
   if (defineVar) {
     return `// scBalanceV1
