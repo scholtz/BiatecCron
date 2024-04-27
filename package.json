@@ -1,6 +1,6 @@
 {
   "name": "biatec-scheduler",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "license": "MIT",
   "scripts": {
     "generate-client": "algokit generate client contracts/artifacts/ --language typescript  --output contracts/clients/{contract_name}Client.ts",
@@ -14,7 +14,7 @@
     "server": "ts-node src/bin/server.ts",
     "gen-swagger": "ts-node src/bin/swagger.ts",
     "deploy-task-manager": "ts-node src/bin/deployTaskManager.ts",
-    "build-package": "tsup src/index.ts --format cjs,esm --clean --sourcemap index --dts src/index.ts --dts-resolve",
+    "build-package": "tsup",
     "publishCmd": "npm publish"
   },
   "main": "./dist/index.js",
@@ -24,6 +24,8 @@
     "dist"
   ],
   "dependencies": {
+  },
+  "devDependencies": {
     "@algorandfoundation/algokit-utils": "^5.8.0",
     "@types/swagger-ui-express": "^4.1.6",
     "algosdk": "^2.7.0",
@@ -39,9 +41,7 @@
     "swagger-ui-express": "^5.0.0",
     "tsup": "^8.0.2",
     "winston": "^3.13.0",
-    "yaml": "^2.4.1"
-  },
-  "devDependencies": {
+    "yaml": "^2.4.1",
     "@algorandfoundation/algokit-client-generator": "^3.0.2",
     "@algorandfoundation/tealscript": "^0.90.3",
     "@jest/globals": "^29.7.0",
