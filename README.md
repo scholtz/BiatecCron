@@ -21,3 +21,31 @@ This work has been performed with support from the Algorand Foundation xGov Gran
 
 - FE: https://scheduler.biatec.io
 - API: https://api-scheduler.biatec.io
+
+## NPM
+
+```
+npm i biatec-scheduler
+```
+
+### Mainnet
+
+```
+const mainnetAppId = getPoolManagerApp('mainnet-v1.0');
+...
+```
+
+### Testnet
+
+```
+const mainnetAppId = getPoolManagerApp('testnet-v1.0');
+...
+```
+
+### Voitest
+
+```
+const mainnetAppId = getPoolManagerApp('voitest-v1');
+...
+```
+
