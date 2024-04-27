@@ -1,5 +1,5 @@
 {
-  "name": "BiatecCron",
+  "name": "biatec-scheduler",
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
@@ -13,8 +13,16 @@
     "exec": "ts-node src/bin/executor.ts",
     "server": "ts-node src/bin/server.ts",
     "gen-swagger": "ts-node src/bin/swagger.ts",
-    "deploy-task-manager": "ts-node src/bin/deployTaskManager.ts"
+    "deploy-task-manager": "ts-node src/bin/deployTaskManager.ts",
+    "build-package": "tsup src/index.ts --format cjs,esm --clean --sourcemap index --dts src/index.ts --dts-resolve",
+    "publishCmd": "npm publish"
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^5.8.0",
     "@types/swagger-ui-express": "^4.1.6",
@@ -29,6 +37,7 @@
     "multer": "^1.4.5-lts.1",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.0",
+    "tsup": "^8.0.2",
     "winston": "^3.13.0",
     "yaml": "^2.4.1"
   },
