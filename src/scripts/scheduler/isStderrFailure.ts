@@ -1,3 +1,6 @@
+/**
+ * Returns true if there is some error in the building process
+ */
 const isStderrFailure = (stderr: string): boolean => {
   const ret = stderr.trim();
   // eslint-disable-next-line no-restricted-syntax
@@ -7,8 +10,10 @@ const isStderrFailure = (stderr: string): boolean => {
       // eslint-disable-next-line no-continue
       continue;
     }
-    return true; // invalid line received
+    if (line.length > 2) {
+      return true; // invalid line received
+    }
   }
-  return !!ret;
+  return false;
 };
 export default isStderrFailure;
