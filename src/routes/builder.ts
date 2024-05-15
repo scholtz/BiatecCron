@@ -19,6 +19,7 @@ import getPoolManagerApp from '../scripts/scheduler/getPoolManagerApp';
 import getBoxReferenceApp from '../scripts/scheduler/getBoxReferenceApp';
 import getBoxReferenceUser from '../scripts/scheduler/getBoxReferenceUser';
 import { BiatecCronJobShortHashClient } from '../../contracts/clients/BiatecCronJob__SHORT_HASH__Client';
+import isStderrFailure from '../scripts/scheduler/isStderrFailure';
 // import { BiatecCronJobShortHashClient } from '../../contracts/clients/BiatecCronJob__SHORT_HASH__Client';
 
 export const builderRouter = Router();
@@ -169,7 +170,7 @@ builderRouter.post('/build/:rebuild', async (req: ExpressRequest, res: Response)
       const { stdout, stderr } = await execPromise(`eslint data/${hash}/ --ext .ts --fix`);
       fs.appendFileSync(`data/${hash}/stdout.txt`, stdout);
       fs.appendFileSync(`data/${hash}/stderr.txt`, stderr);
-      isError = !!stderr.trim();
+      isError = isStderrFailure(stderr.trim());
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error(error);
@@ -185,7 +186,7 @@ builderRouter.post('/build/:rebuild', async (req: ExpressRequest, res: Response)
         );
         fs.appendFileSync(`data/${hash}/stdout.txt`, stdout);
         fs.appendFileSync(`data/${hash}/stderr.txt`, stderr);
-        isError = !!stderr.trim();
+        isError = isStderrFailure(stderr.trim());
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error);
@@ -202,7 +203,7 @@ builderRouter.post('/build/:rebuild', async (req: ExpressRequest, res: Response)
         );
         fs.appendFileSync(`data/${hash}/stdout.txt`, stdout);
         fs.appendFileSync(`data/${hash}/stderr.txt`, stderr);
-        isError = !!stderr.trim();
+        isError = isStderrFailure(stderr.trim());
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
